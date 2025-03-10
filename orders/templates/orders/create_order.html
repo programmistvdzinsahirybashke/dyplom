@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% load static %}
+{% load carts_tags %}
+
+{% block content %}
+{% csrf_token %}
+<div class="bg-white p-4 mb-4 mx-2 rounded">
+    <div class="container">
+        <h3 class="text-center mb-4">Выбранные товары</h3>
+        <div class="container" id="cart-items-container">
+            <!-- Разметка корзины -->
+            {% user_carts request as carts %}
+            {% include "carts/includes/included_cart.html" %}
+            <!-- Закончилась разметка корзины -->
+        </div>
+    </div>
+    <!-- Детали заказа -->
+    <div class="container">
+        <h3 class="text-center">Детали заказа</h3>
+        <div class="card mb-3">
+            <div class="card-body">
+                <form action="{% url 'orders:create_order' %}" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_first_name" class="form-label">Имя*:</label>
+                            <input type="text" class="form-control" id="id_first_name"
+                                   value="{% if form.first_name.value %}{{ form.first_name.value }}{% endif %}"
+                                   name="first_name" required>
+                            {% if form.first_name.errors %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ form.first_name.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_last_name" class="form-label">Фамилия*:</label>
+                            <input type="text" class="form-control" id="id_last_name" name="last_name"
+                                   value="{% if form.last_name.value %}{{ form.last_name.value }}{% endif %}"
+                                   required>
+                            {% if form.last_name.errors %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ form.last_name.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_phone_number" class="form-label">Номер телефона*:</label>
+                            <input type="text" class="form-control" id="id_phone_number"
+                                   value="{% if form.phone_number.value %}{{ form.phone_number.value }}{% endif %}"
+                                   name="phone_number" placeholder="В формате: 79171234567" required>
+                            {% if form.phone_number.errors %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ form.phone_number.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label for="date">Выберите дату и время сдачи/вывоза:</label>
+                            {% if form.date.errors %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ form.date.errors }}
+                                </div>
+                            {% endif %}
+                            <input type="date" id="date" name="delivery_date" required>
+<!--                            <label for="time">Время:</label>-->
+                            {% if form.time.errors %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ form.time.errors }}
+                                </div>
+                            {% endif %}
+                            <select id="time" name="delivery_time" required>
+                                <!-- Опции времени будут добавлены с помощью JavaScript -->
+                            </select>
+
+                            <input type="hidden" id="delivery_datetime" name="delivery_datetime">
+
+
+                            <script>
+                                document.addEventListener('DOMContentLoaded', () => {
+    const timeSelect = document.getElementById('time');
+    const dateInput = document.getElementById('date');
+    const deliveryDateTimeInput = document.getElementById('delivery_datetime'); // Добавьте этот input в HTML, если его нет
+    const startTime = 8; // Начало рабочего времени (8:00)
+    const endTime = 16; // Конец рабочего времени (16:00)
+    const interval = 15; // Интервал времени в минутах
+
+
+
+    function populateTimeOptions(selectedDate) {
+        timeSelect.innerHTML = ''; // Очистка предыдущих опций
+
+        // Запрашиваем занятые времена у сервера
+        fetch(`/orders/api/get-occupied-times/?date=${selectedDate}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Ошибка HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const occupiedTimes = data.occupied_times || [];
+                console.log('Занятые времена:', occupiedTimes);
+
+                // Генерация доступных временных интервалов
+                for (let hour = startTime; hour < endTime; hour++) {
+                    for (let minutes = 0; minutes < 60; minutes += interval) {
+                        const time = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                        const option = document.createElement('option');
+                        option.value = time;
+                        option.textContent = time;
+
+                        // Проверяем, занято ли это время
+                        if (occupiedTimes.includes(time)) {
+                            option.disabled = true; // Отключаем занятые времена
+                        }
+
+                        timeSelect.appendChild(option);
+                    }
+                }
+
+                // Если все опции недоступны
+                if (!timeSelect.innerHTML.trim()) {
+                    const noAvailableOption = document.createElement('option');
+                    noAvailableOption.textContent = 'Нет доступных времён';
+                    noAvailableOption.disabled = true;
+                    noAvailableOption.selected = true;
+                    timeSelect.appendChild(noAvailableOption);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при получении данных о занятых временах:', error);
+            });
+    }
+
+    // Установка минимальной даты на сегодня
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.setAttribute('min', today);
+
+    // Событие при изменении даты
+    dateInput.addEventListener('change', (event) => {
+        const selectedDate = event.target.value;
+        if (selectedDate) {
+            populateTimeOptions(selectedDate);
+        }
+    });
+
+    // Обновление скрытого поля даты и времени
+    timeSelect.addEventListener('change', () => {
+        const selectedDate = dateInput.value;
+        const selectedTime = timeSelect.value;
+        if (selectedDate && selectedTime) {
+            if (deliveryDateTimeInput) {
+                deliveryDateTimeInput.value = `${selectedDate}T${selectedTime}`;
+            } else {
+                console.error("Элемент с id 'delivery_datetime' не найден. Проверьте HTML-код.");
+            }
+        }
+    });
+
+    // Инициализация времён для минимальной даты (сегодня)
+    populateTimeOptions(today);
+});
+                            </script>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Способ доставки: </label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="requires_delivery"
+                                       id="id_requires_delivery_delivery" value="1" checked onclick="toggleDeliveryAddress()">
+                                <label class="form-check-label" for="id_requires_delivery_delivery">Нужна доставка</label>
+                                {% if form.requires_delivery.errors %}
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ form.requires_delivery.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="requires_delivery"
+                                       id="id_requires_delivery_pickup" value="0" onclick="toggleDeliveryAddress()">
+                                <label class="form-check-label" for="id_requires_delivery_pickup">Самовывоз</label>
+                            </div>
+                        </div>
+                        <div class="mb-3" id="deliveryAddressField">
+                            <label for="id_delivery_address" class="form-label">Адрес доставки*:</label>
+                            <textarea class="form-control" id="id_delivery_address" name="delivery_address" rows="2"></textarea>
+                            {% if form.delivery_address.errors %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ form.delivery_address.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Способ оплаты: </label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="payment_on_get"
+                                       id="id_payment_on_get" value="0" checked>
+                                <label class="form-check-label" for="id_payment_on_get">Оплата картой</label>
+                                {% if form.payment_on_get.errors %}
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ form.payment_on_get.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="payment_on_get"
+                                       id="id_payment_on_get_cash" value="1">
+                                <label class="form-check-label" for="id_payment_on_get_cash">Наличными/картой при получении</label>
+                                {% if form.payment_on_get.errors %}
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ form.payment_on_get.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_comment" class="form-label">Комментарий (если нужен):</label>
+                                <textarea class="form-control" id="id_comment" name="comment" rows="2"></textarea>
+                                {% if form.comment.errors %}
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ form.comment.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-dark">Оформить заказ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDeliveryAddress() {
+    const deliveryAddressField = document.getElementById('id_delivery_address');
+    const pickupOption = document.getElementById('id_requires_delivery_pickup').checked;
+
+    if (pickupOption) {
+        deliveryAddressField.value = ''; // Очистить поле адреса
+    }
+}
+</script>
+
+{% endblock %}

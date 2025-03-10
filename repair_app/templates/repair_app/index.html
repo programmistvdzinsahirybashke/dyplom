@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static "deps/css/my_footer_css.css" %}">
+    <style>
+        .custom-button {
+            background-color: #6c757d; /* Серый цвет кнопки */
+            color: white; /* Белый текст */
+            padding: 8px 16px; /* Внутренние отступы */
+            border: none; /* Без границ */
+            border-radius: 5px; /* Закругленные углы */
+            font-size: 16px; /* Обычный размер текста */
+            text-decoration: none; /* Убираем подчеркивание */
+            transition: background-color 0.3s ease; /* Анимация изменения цвета */
+        }
+
+        .custom-button:hover {
+            background-color: #5a6268; /* Более темный серый при наведении */
+        }
+    </style>
+{% endblock %}
+
+{% block modal_cart %}
+{% include "includes/cart_button.html" %}
+{% endblock %}
+
+{% block content %}
+<h1 class="mt-5 pt-5"><strong>{{ content }}</strong></h1>
+
+<div class="text-left">
+    <img src="{% static "deps/images/bass.jpg" %}" alt="Описание изображения" class="img-fluid" style="width: 100%; height: auto;">
+</div>
+
+<div class="text-center mt-4">
+    <a href="{% url "catalog:index" 'all' %}" class="btn btn-dark">Открыть каталог услуг</a>
+</div>
+{% endblock %}
+
+{% block footer %}
+<footer class="py-4 bg-dark">
+    <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; RepAir 2024</p>
+    </div>
+</footer>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+
+
+{% block css %}
+    <link rel="stylesheet" href="{% static "deps/css/my_footer_css.css"%}">
+{% endblock %}
+
+
+{% block modal_cart %}
+{% include "includes/cart_button.html" %}
+{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <h1><span class="highlight">Контакты</span></h1>
+
+        <h3><strong>Сервисный центр RepAir</strong> </h3>
+          <p><strong>Адрес:</strong> ул. Примерная, 10, г. Альметьевск, Россия</p>
+          <p><strong>Телефон:</strong> +7 (123) 456-78-90</p>
+      <p><strong>Электронная почта:</strong> info@repair.com</p>
+      <p><strong>График работы:</strong> 9:00 - 18:00, Сб-Вс: выходной</p>
+
+
+
+
+
+        <h4>Мы всегда рады вашим вопросам и готовы помочь вам с ремонтом и обслуживанием ваших микромобильных средств. Свяжитесь с нами по телефону или электронной почте, и мы постараемся ответить на все ваши запросы в кратчайшие сроки!</h4>
+
+
+    </div>
+
+{% endblock %}
+
+
+{% block footer %}
+<footer class="py-4 bg-dark">
+    <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; RepAir 2024</p>
+    </div>
+</footer>
+{% endblock %}
+

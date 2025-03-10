@@ -1,0 +1,4 @@
+Django==5.1.3
+Pillow
+Psycopg2
+django-debug-toolbar

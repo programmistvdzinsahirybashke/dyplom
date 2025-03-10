@@ -1,0 +1,47 @@
+"category": [
+    {
+      "pk": 11,
+	  "model":"goods.Category"
+	  "fields":{
+	  "category_name": "\u0421\u0430\u043c\u043e\u043a\u0430\u0442",
+      "slug": "samokat"
+	  }
+    }
+  ]
+
+,
+    {
+      "pk": 12,
+      "category_name": "\u0413\u0438\u0440\u043e\u0441\u043a\u0443\u0442\u0435\u0440",
+      "slug": "giroskuter"
+    },
+    {
+      "pk": 13,
+      "category_name": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u0441\u0430\u043c\u043e\u043a\u0430\u0442",
+      "slug": "elektrosamokat"
+    },
+    {
+      "pk": 14,
+      "category_name": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u0432\u0435\u043b\u043e\u0441\u0438\u043f\u0435\u0434",
+      "slug": "elektrovelosiped"
+    },
+    {
+      "pk": 15,
+      "category_name": "\u041c\u043e\u043d\u043e\u043a\u043e\u043b\u0435\u0441\u043e",
+      "slug": "monokoleso"
+    },
+    {
+      "pk": 16,
+      "category_name": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u043c\u043e\u0442\u043e\u0446\u0438\u043a\u043b",
+      "slug": "elektromotocikl"
+    },
+    {
+      "pk": 9,
+      "category_name": "\u0412\u0441\u0435 \u0443\u0441\u043b\u0443\u0433\u0438",
+      "slug": "all"
+    },
+    {
+      "pk": 10,
+      "category_name": "\u0412\u0435\u043b\u043e\u0441\u0438\u043f\u0435\u0434",
+      "slug": "velosiped"
+    }

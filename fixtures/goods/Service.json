@@ -1,0 +1,113 @@
+{
+"Service": [
+	{
+		"id" : 2,
+		"service_name" : "Полное техническое обслуживание",
+		"service_description" : "Полное техническое обслуживание вашего электромотоцикла",
+		"price" : 12000.00,
+		"slug" : "polnoe-tehnicheskoe-obsluzhivanie-em",
+		"category_id" : 16,
+		"image" : "goods_images\/elemoto.jpg",
+		"discount" : 0.00
+	},
+	{
+		"id" : 4,
+		"service_name" : "Спицовка колеса",
+		"service_description" : "Полная сборка колеса",
+		"price" : 1000.00,
+		"slug" : "spicovka-kolesa-velosipeda",
+		"category_id" : 10,
+		"image" : "goods_images\/bicycle_wFGpxHC.jpg",
+		"discount" : 0.00
+	},
+	{
+		"id" : 3,
+		"service_name" : "Ремонт камеры",
+		"service_description" : "Ремонт камеры велосипеда",
+		"price" : 300.00,
+		"slug" : "remont-kamery-velosipeda",
+		"category_id" : 10,
+		"image" : "goods_images\/bicycle_R4WN1Ar.jpg",
+		"discount" : 0.00
+	},
+	{
+		"id" : 6,
+		"service_name" : "Замена аккумулятора",
+		"service_description" : "Замена аккумулятора электровелосипеда",
+		"price" : 3000.00,
+		"slug" : "zamena-akkumulyatora-velo",
+		"category_id" : 14,
+		"image" : "goods_images\/elevelo.jpg",
+		"discount" : 0.00
+	},
+	{
+		"id" : 7,
+		"service_name" : "Замена грипс",
+		"service_description" : "Замена грипс руля самоката",
+		"price" : 200.00,
+		"slug" : "zamena-grips-samik",
+		"category_id" : 11,
+		"image" : "goods_images\/3391409.jpg",
+		"discount" : 0.00
+	},
+	{
+		"id" : 1,
+		"service_name" : "Полное техническое обслуживание",
+		"service_description" : "Полное техническое обслуживание вашего велосипеда",
+		"price" : 1500.00,
+		"slug" : "polnoe-tehnicheskoe-obsluzhivanie-velo",
+		"category_id" : 10,
+		"image" : "goods_images\/bicycle_z1cUxaF.jpg",
+		"discount" : 15.00
+	},
+	{
+		"id" : 8,
+		"service_name" : "Замена рулевой",
+		"service_description" : "Замена рулевой колонки велосипеда (подшипников, пыльников)",
+		"price" : 500.00,
+		"slug" : "zamena-rulevoj",
+		"category_id" : 10,
+		"image" : "goods_images\/bicycle_5AtBcEH.jpg",
+		"discount" : 0.00
+	},
+	{
+		"id" : 9,
+		"service_name" : "Настройка механических тормозов",
+		"service_description" : "Настройка механических  тормозов велосипеда",
+		"price" : 800.00,
+		"slug" : "nastrojka-mehanicheskih-tormozov",
+		"category_id" : 10,
+		"image" : "goods_images\/bicycle_13F6SuN.jpg",
+		"discount" : 0.00
+	},
+	{
+		"id" : 10,
+		"service_name" : "Настройка гидравлических тормозов",
+		"service_description" : "Настройка гидравлических тормозов велосипеда",
+		"price" : 1200.00,
+		"slug" : "nastrojka-gidravlicheskih-tormozov",
+		"category_id" : 10,
+		"image" : "goods_images\/bicycle_n3XmZbn.jpg",
+		"discount" : 0.00
+	},
+	{
+		"id" : 11,
+		"service_name" : "Накачка колес",
+		"service_description" : "Накачка колес электросамоката до отказа до взрыва буквально",
+		"price" : 300.00,
+		"slug" : "nakachka-koles",
+		"category_id" : 13,
+		"image" : "goods_images\/elesamo_JlM9fiL.jpg",
+		"discount" : 0.00
+	},
+	{
+		"id" : 5,
+		"service_name" : "Замена тормозов",
+		"service_description" : "Замена тормозов электросамоката",
+		"price" : 2000.00,
+		"slug" : "zamena-tormozov-elektrosamokata",
+		"category_id" : 13,
+		"image" : "goods_images\/elesamo.jpg",
+		"discount" : 5.00
+	}
+]}
