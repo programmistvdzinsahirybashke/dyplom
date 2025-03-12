@@ -79,7 +79,13 @@
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>
-                                    <li><a class="dropdown-item  text-white" href="{% url "users:logout" %}">Выйти</a></li>
+                                    <li><a class="dropdown-item  text-white"  onclick="return confirmLogout()" href="{% url "users:logout" %}">Выйти</a></li>
+
+                                            <script>
+                                            function confirmLogout() {
+                                                return confirm("Вы уверены, что хотите выйти?");
+                                            }
+                                            </script>
                                 </ul>
                             </li>
                         {% endif %}

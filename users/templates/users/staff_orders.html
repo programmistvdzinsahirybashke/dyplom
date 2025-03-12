@@ -70,7 +70,15 @@
                                                 <input type="hidden" name="order_id" value="{{ order.id }}">
 
                                                 <input type="hidden" name="new_status" value="Выполнено">
-                                                <button type="submit" class="btn btn-success">Выполнил</button>
+                                               <button type="submit" onclick="return confirmDoneAction()" class="btn btn-success">Выполнил</button>
+
+                                                <script>
+                                                function confirmDoneAction() {
+                                                    return confirm("Вы уверены, что хотите изменить статус задачи на \"Выполнено\"? \nЗадача: {{ item.product.service_name }} | {{ item.product.category }}\n");
+                                                }
+                                                </script>
+
+
                                             </form>
                                         {% else %}
                                             <form method="POST" style="display:inline;">
@@ -79,7 +87,12 @@
                                                 <input type="hidden" name="order_id" value="{{ order.id }}">
 
                                                 <input type="hidden" name="new_status" value="В работе">
-                                                <button type="submit" class="btn btn-danger">Отменить выполнение</button>
+                                                <button type="submit" onclick="return confirmUndoneAction()" class="btn btn-danger">Отменить выполнение</button>
+                                                     <script>
+                                                function confirmUndoneAction() {
+                                                    return confirm("Вы уверены, что хотите отменить выполнение задачи?\nЗадача: {{ item.product.service_name }} | {{ item.product.category }}\n ");
+                                                }
+                                                </script>
                                             </form>
                                         {% endif %}
                                     </td>

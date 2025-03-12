@@ -92,7 +92,13 @@
 
 
 
-    <button type="submit" name="update_order" class="btn btn-primary">Сохранить изменения</button>
+    <button type="submit" name="update_order" onclick="return confirmOrderUpdate()" class="btn btn-primary">Сохранить изменения</button>
+     <script>
+    function confirmOrderUpdate() {
+        return confirm("Вы уверены, что хотите обновить данные заказа?");
+    }
+    </script>
+
 </form>
 
 <p><strong>Состав заказа:</strong></p>
@@ -147,7 +153,13 @@
     </table>
 
     <!-- Кнопка для назначения всех сотрудников -->
-    <button type="submit" name="assign_all" class="btn btn-primary">Назначить сотрудников</button>
+    <button type="submit" name="assign_all" onclick="return confirmEmployeeUpdate()" class="btn btn-primary">Назначить сотрудников</button>
+    <script>
+    function confirmEmployeeUpdate() {
+        return confirm("Вы уверены, что хотите обновить назначенных сотрудников?");
+    }
+    </script>
+
 </form>
 
 
