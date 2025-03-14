@@ -83,13 +83,23 @@ def profile(request):
             return HttpResponseRedirect(reverse('user:profile'))
     else:
         form = ProfileForm(instance=request.user)
+        # Параметры для поиска заказов
+    order_search = request.GET.get('order_search', '')
 
+
+    # Извлечение заказов пользователя
     orders = Order.objects.filter(user=request.user).prefetch_related(
         Prefetch(
             "orderitem_set",
             queryset=OrderItem.objects.select_related("product"),
         )
     ).order_by("-id")
+
+    if order_search:
+        orders = orders.filter(
+            Q(id__icontains=order_search) |
+            Q(status__status_name__icontains=order_search)
+        )
 
     # Вычисляем общую сумму для каждого заказа
     for order in orders:

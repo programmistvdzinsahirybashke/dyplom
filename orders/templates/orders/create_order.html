@@ -85,8 +85,6 @@
     const endTime = 16; // Конец рабочего времени (16:00)
     const interval = 15; // Интервал времени в минутах
 
-
-
     function populateTimeOptions(selectedDate) {
         timeSelect.innerHTML = ''; // Очистка предыдущих опций
 
@@ -106,6 +104,10 @@
                 for (let hour = startTime; hour < endTime; hour++) {
                     for (let minutes = 0; minutes < 60; minutes += interval) {
                         const time = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+                        // Исключаем обеденный перерыв с 12:00 до 13:00
+                        if (hour === 12 || (hour === 13 && minutes === 0)) continue;
+
                         const option = document.createElement('option');
                         option.value = time;
                         option.textContent = time;
@@ -168,7 +170,7 @@
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="requires_delivery"
                                        id="id_requires_delivery_delivery" value="1" checked onclick="toggleDeliveryAddress()">
-                                <label class="form-check-label" for="id_requires_delivery_delivery">Нужна доставка</label>
+                                <label class="form-check-label" for="id_requires_delivery_delivery">Нужна доставка (500 руб.)</label>
                                 {% if form.requires_delivery.errors %}
                                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                         {{ form.requires_delivery.errors }}
@@ -240,5 +242,7 @@ function toggleDeliveryAddress() {
     }
 }
 </script>
+
+
 
 {% endblock %}

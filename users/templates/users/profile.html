@@ -4,163 +4,80 @@
 {% load multiply %}
 
 {% block content %}
-
-<div class="container-fluid">  <!-- Используем контейнер на всю ширину -->
+<div class="container-fluid">
     <div class="row mt-1">
 
-
-
-
-        <div class="col-lg-12">  <!-- Увеличил ширину блока на всю строку -->
-    <div class="bg-white p-4 mb-4 rounded">
-        <h3 class="text-center mb-6">Профиль пользователя</h3>
-        <form action="{% url 'user:profile' %}" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="row">
-                <div class="col-md-4 mb-3 text-center">
-                    {% if user.image %}
-                        <img src="{{ user.image.url }}"
-                             alt="Аватар пользователя" class="img-fluid rounded-circle"
-                             style="max-width: 155px;">
-                    {% else %}
-                        <img src="{% static 'deps/images/baseavatar.jpg' %}"
-                             alt="Аватар пользователя" class="img-fluid rounded-circle"
-                             style="max-width: 155px;">
-                    {% endif %}
-                    <input type="file" class="form-control mt-3" id="id_image" name="image" accept="image/*">
-                    {% if form.image.errors %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ form.image.errors }}
+        <div class="col-lg-12">
+            <div class="bg-white p-4 mb-4 rounded">
+                <h3 class="text-center mb-6">Профиль пользователя</h3>
+                <form action="{% url 'user:profile' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-4 mb-3 text-center">
+                            {% if user.image %}
+                                <img src="{{ user.image.url }}"
+                                     alt="Аватар пользователя" class="img-fluid rounded-circle"
+                                     style="max-width: 155px;">
+                            {% else %}
+                                <img src="{% static 'deps/images/baseavatar.jpg' %}"
+                                     alt="Аватар пользователя" class="img-fluid rounded-circle"
+                                     style="max-width: 155px;">
+                            {% endif %}
+                            <input type="file" class="form-control mt-3" id="id_image" name="image" accept="image/*">
+                            {% if form.image.errors %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ form.image.errors }}
+                                </div>
+                            {% endif %}
                         </div>
-                    {% endif %}
-                </div>
-                <div class="col-md-3 mb-2">
-                    <label for="id_first_name" class="form-label">Имя*</label>
-                    <input type="text" class="form-control" id="id_first_name" name="first_name"
-                           placeholder="Введите ваше имя" value="{{ form.first_name.value }}" required>
+                        <div class="col-md-3 mb-2">
+                            <label for="id_first_name" class="form-label">Имя*</label>
+                            <input type="text" class="form-control" id="id_first_name" name="first_name"
+                                   placeholder="Введите ваше имя" value="{{ form.first_name.value }}" required>
 
-                      <label for="id_last_name" class="form-label">Фамилия*</label>
-                    <input type="text" class="form-control" id="id_last_name" name="last_name"
-                           placeholder="Введите вашу фамилию" value="{{ form.last_name.value }}" required>
-                </div>
+                            <label for="id_last_name" class="form-label">Фамилия*</label>
+                            <input type="text" class="form-control" id="id_last_name" name="last_name"
+                                   placeholder="Введите вашу фамилию" value="{{ form.last_name.value }}" required>
+                        </div>
 
-                <div class="col-md-3 mb-3">
-                    <label for="id_username" class="form-label">Имя пользователя*</label>
-                    <input type="text" class="form-control" id="id_username" name="username"
-                           placeholder="Введите ваше имя пользователя" value="{{ form.username.value }}" required>
+                        <div class="col-md-3 mb-3">
+                            <label for="id_username" class="form-label">Имя пользователя*</label>
+                            <input type="text" class="form-control" id="id_username" name="username"
+                                   placeholder="Введите ваше имя пользователя" value="{{ form.username.value }}" required>
 
-                      <label for="id_email" class="form-label">Email*</label>
-                    <input type="email" class="form-control" id="id_email" name="email"
-                           placeholder="Введите ваш email" value="{{ form.email.value }}" required>
-                </div>
+                            <label for="id_email" class="form-label">Email*</label>
+                            <input type="email" class="form-control" id="id_email" name="email"
+                                   placeholder="Введите ваш email" value="{{ form.email.value }}" required>
+                        </div>
 
-                <div class="d-flex align-items-end justify-content-end col-md-3">
-                    <button type="submit" onclick="return confirmProfileUpdate()" class="btn btn-dark w-100">Сохранить</button>
-                    <script>
-                    function confirmProfileUpdate() {
-                        return confirm("Вы уверены, что хотите обновить данные профиля?");
-                    }
-                    </script>
-
-                </div>
+                        <div class="d-flex align-items-end justify-content-end col-md-3">
+                            <button type="submit" onclick="return confirmProfileUpdate()" class="btn btn-dark w-100">Сохранить</button>
+                            <script>
+                            function confirmProfileUpdate() {
+                                return confirm("Вы уверены, что хотите обновить данные профиля?");
+                            }
+                            </script>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </form>
-    </div>
-</div>
+        </div>
 
+        <!-- Блок поиска по заказам -->
+        <div class="col-12">
+            <div class="bg-white p-4 mb-4 rounded">
+                <h3 class="text-center mb-4">Поиск по заказам</h3>
+                <form method="get" action="{% url 'user:profile' %}">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="order_search" placeholder="Поиск по номеру заказа или статусу"
+                               value="{{ request.GET.order_search }}">
+                        <button class="btn btn-outline-secondary" type="submit">Искать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-
-
-
-
-
-
-        <!-- Блок профиля пользователя, занимает 4 колонки -->
-<!--        <div class="col-lg-4 col-md-5">  &lt;!&ndash; Профиль занимает 4 колонки из 12 &ndash;&gt;-->
-<!--            <div class="bg-white p-4 mb-4 rounded">-->
-<!--                <h3 class="text-center mb-4">Профиль пользователя</h3>-->
-<!--                <form action="{% url "user:profile" %}" method="post" enctype="multipart/form-data">-->
-<!--                    {% csrf_token %}-->
-<!--                    <div class="row">-->
-<!--                        <div class="col-md-12 mb-3 text-center">-->
-<!--                            {% if user.image %}-->
-<!--                                <img src="{{ user.image.url }}"-->
-<!--                                     alt="Аватар пользователя" class="img-fluid rounded-circle"-->
-<!--                                     style="max-width: 150px;">-->
-<!--                            {% else %}-->
-<!--                                <img src="{% static "deps/images/baseavatar.jpg" %}"-->
-<!--                                     alt="Аватар пользователя" class="img-fluid rounded-circle"-->
-<!--                                     style="max-width: 150px;">-->
-<!--                            {% endif %}-->
-<!--                            <input type="file" class="form-control mt-3" id="id_image" name="image" accept="image/*">-->
-<!--                            {% if form.image.errors %}-->
-<!--                                <div class="alert alert-danger alert-dismissible fade show" role="alert">-->
-<!--                                    {{form.image.errors}}-->
-<!--                                </div>-->
-<!--                            {% endif %}-->
-<!--                        </div>-->
-<!--                        <div class="col-md-12 mb-3">-->
-<!--                            <label for="id_first_name" class="form-label">Имя*</label>-->
-<!--                            <input type="text" class="form-control" id="id_first_name" name="first_name"-->
-<!--                                   placeholder="Введите ваше имя" value="{{ form.first_name.value }}" required>-->
-<!--                            {% if form.first_name.errors %}-->
-<!--                                <div class="alert alert-danger alert-dismissible fade show" role="alert">-->
-<!--                                    {{form.first_name.errors}}-->
-<!--                                </div>-->
-<!--                            {% endif %}-->
-<!--                        </div>-->
-<!--                        <div class="col-md-12 mb-3">-->
-<!--                            <label for="id_last_name" class="form-label">Фамилия*</label>-->
-<!--                            <input type="text" class="form-control" id="id_last_name" name="last_name"-->
-<!--                                   placeholder="Введите вашу фамилию" value="{{ form.last_name.value }}" required>-->
-<!--                            {% if form.last_name.errors %}-->
-<!--                                <div class="alert alert-danger alert-dismissible fade show" role="alert">-->
-<!--                                    {{form.last_name.errors}}-->
-<!--                                </div>-->
-<!--                            {% endif %}-->
-<!--                        </div>-->
-<!--                        <div class="col-md-12 mb-3">-->
-<!--                            <label for="id_username" class="form-label">Имя пользователя*</label>-->
-<!--                            <input type="text" class="form-control" id="id_username" name="username"-->
-<!--                                   placeholder="Введите ваше имя пользователя" value="{{ form.username.value }}" required>-->
-<!--                            {% if form.username.errors %}-->
-<!--                                <div class="alert alert-danger alert-dismissible fade show" role="alert">-->
-<!--                                    {{form.username.errors}}-->
-<!--                                </div>-->
-<!--                            {% endif %}-->
-<!--                        </div>-->
-<!--                        <div class="col-md-12 mb-3">-->
-<!--                            <label for="id_email" class="form-label">Email*</label>-->
-<!--                            <input type="email" class="form-control" id="id_email" name="email"-->
-<!--                                   placeholder="Введите ваш email *youremail@example.com" value="{{ form.email.value }}" required>-->
-<!--                            {% if form.email.errors %}-->
-<!--                                <div class="alert alert-danger alert-dismissible fade show" role="alert">-->
-<!--                                    {{form.email.errors}}-->
-<!--                                </div>-->
-<!--                            {% endif %}-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <button type="submit" class="btn btn-dark">Сохранить</button>-->
-<!--                </form>-->
-<!--            </div>-->
-<!--        </div>-->
-
-        <!-- Блок корзины, занимает 8 колонок -->
-<!--        <div class="col-lg-8 col-md-7">-->
-<!--            <div class="bg-white p-4 mb-4 rounded">-->
-<!--                <h3 class="text-center mb-4">Корзина</h3>-->
-<!--                <div class="container" id="cart-items-container">-->
-<!--                    {% user_carts request as carts %}-->
-<!--                    &lt;!&ndash; Разметка корзины &ndash;&gt;-->
-<!--                    {% include "carts/includes/included_cart.html" %}-->
-<!--                    &lt;!&ndash; Закончилась разметка корзины &ndash;&gt;-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-    </div>
-
-    <!-- Оформленные заказы под корзиной на всю ширину -->
-    <div class="row">
+        <!-- Блок профиля пользователя -->
         <div class="col-12">
             <div class="bg-white p-4 mb-4 rounded">
                 <h3 class="text-center mb-4">Мои заказы</h3>
@@ -180,15 +97,15 @@
                                  aria-labelledby="heading{{ order.id }}" data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
                                     <p><strong>Информация о заказе №{{ order.id }}</strong> </p>
-                                        <p><strong>Общая сумма: </strong>{{ order.total }} руб.</p>
+                                    <p><strong>Общая сумма: </strong>{{ order.total }} руб.</p>
 
-                                            {% if order.requires_delivery %}
-                                            <p><strong>Требуется выезд сотрудника:</strong> Да </p>
-                                            {% else %}
-                                            <p><strong>Требуется выезд: </strong>Нет </p>
-                                            {% endif %}
+                                    {% if order.requires_delivery %}
+                                    <p><strong>Требуется выезд сотрудника:</strong> Да </p>
+                                    {% else %}
+                                    <p><strong>Требуется выезд: </strong>Нет </p>
+                                    {% endif %}
 
-                                    {% if order.delivery_address  %}
+                                    {% if order.delivery_address %}
                                     <p><strong>Адрес для выездного забора средства в сервис:</strong> {{ order.delivery_address }}</p>
                                     <p><strong>Дата и время выездного забора средства в сервис:</strong> {{ order.delivery_date }} в <strong>{{ order.delivery_time }} МСК</strong> </p>
                                     {% else %}
@@ -196,7 +113,7 @@
                                     <p><strong>Дата и время для сдачи средства в сервис:</strong> {{ order.delivery_date }} в {{ order.delivery_time }} МСК </p>
                                     {% endif %}
                                     <p><strong>Комментарий: </strong>"{{ order.comment }}"</p>
-                                    <p> <strong>Состав заказа в таблице:</strong> </p>
+                                    <p><strong>Состав заказа в таблице:</strong></p>
                                     <table class="table table-dark table-hover">
                                         <thead>
                                             <tr>
@@ -221,7 +138,6 @@
                                                 {% else %}
                                                 <td> - </td>
                                                 {% endif %}
-
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -234,7 +150,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 </div>
-
 {% endblock %}
