@@ -280,6 +280,30 @@ def update_employee(request, order_id):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from orders.models import OrderItem, Status
+
+@login_required
+def mark_item_picked_up(request, item_id):
+    item = get_object_or_404(OrderItem, id=item_id)
+
+    # Проверяем, является ли пользователь администратором
+    if not request.user.is_superuser:
+        messages.error(request, "Недостаточно прав для выполнения этого действия.")
+        return redirect('admin_orders')
+
+    # Меняем статус на 7 (предположим, что это ID статуса "Клиент забрал средство")
+    item.status_id = 7
+    item.save()
+
+    messages.success(request, "Статус задачи успешно обновлён.")
+    return redirect(request.META.get("HTTP_REFERER", "admin_orders"))
+
+
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import Http404

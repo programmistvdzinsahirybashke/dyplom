@@ -147,6 +147,16 @@
                         {% endfor %}
                     </select>
                 </td>
+                <td>
+    <form method="POST" action="{% url 'users:mark_item_picked_up' item.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success btn-sm"
+                onclick="return confirm('Подтвердите, что клиент забрал средство?')">
+            Клиент забрал средство
+        </button>
+    </form>
+</td>
+
             </tr>
             {% endfor %}
         </tbody>
