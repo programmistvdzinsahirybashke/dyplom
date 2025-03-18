@@ -148,13 +148,23 @@
                     </select>
                 </td>
                 <td>
-    <form method="POST" action="{% url 'users:mark_item_picked_up' item.id %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-success btn-sm"
-                onclick="return confirm('Подтвердите, что клиент забрал средство?')">
-            Клиент забрал средство
-        </button>
-    </form>
+               <td>
+                <form method="POST" action="{% url 'users:toggle_picked_status' item.id %}">
+                    {% csrf_token %}
+                    {% if item.status.id == 7 %}
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Подтвердите, что клиент НЕ забрал средство?')">
+                            Клиент не забрал средство
+                        </button>
+                    {% else %}
+                        <button type="submit" class="btn btn-success btn-sm"
+                                onclick="return confirm('Подтвердите, что клиент забрал средство?')">
+                            Клиент забрал средство
+                        </button>
+                    {% endif %}
+                </form>
+            </td>
+
 </td>
 
             </tr>
@@ -163,12 +173,8 @@
     </table>
 
     <!-- Кнопка для назначения всех сотрудников -->
-    <button type="submit" name="assign_all" onclick="return confirmEmployeeUpdate()" class="btn btn-primary">Назначить сотрудников</button>
-    <script>
-    function confirmEmployeeUpdate() {
-        return confirm("Вы уверены, что хотите обновить назначенных сотрудников?");
-    }
-    </script>
+    <button type="submit" name="assign_all" onclick="return confirm('Вы уверены, что хотите обновить назначенных сотрудников?')" class="btn btn-primary">Назначить сотрудников</button>
+
 
 </form>
 

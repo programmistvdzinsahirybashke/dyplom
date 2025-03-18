@@ -11,6 +11,6 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path('admin/orders/', views.admin_orders, name='admin_orders'),
     path('staff/orders/', views.staff_orders, name='staff_orders'),
-    path('orders/item/<int:item_id>/picked_up/', views.mark_item_picked_up, name='mark_item_picked_up'),
+    path('orders/item/<int:item_id>/toggle_picked/', views.toggle_picked_status, name='toggle_picked_status'),
 
 ]
