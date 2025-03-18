@@ -145,36 +145,59 @@
                                 {% endwith %}
                             </option>
                         {% endfor %}
-                    </select>
-                </td>
-                <td>
-               <td>
-                <form method="POST" action="{% url 'users:toggle_picked_status' item.id %}">
-                    {% csrf_token %}
-                    {% if item.status.id == 7 %}
-                        <button type="submit" class="btn btn-danger btn-sm"
-                                onclick="return confirm('Подтвердите, что клиент НЕ забрал средство?')">
-                            Клиент не забрал средство
-                        </button>
-                    {% else %}
-                        <button type="submit" class="btn btn-success btn-sm"
-                                onclick="return confirm('Подтвердите, что клиент забрал средство?')">
-                            Клиент забрал средство
-                        </button>
-                    {% endif %}
-                </form>
-            </td>
 
-</td>
+                    </select>
+
+                </td>
+
+
+                <td>
+                    <button class="btn btn-danger btn-sm toggle-status"
+                            data-url="{% url 'users:toggle_picked_status' item.id %}"
+        data-item-id="{{ item.id }}"
+        data-confirm-message="Подтвердите, что клиент НЕ забрал средство?">
+    Клиент не забрал средство
+</button>
+
+<button class="btn btn-success btn-sm toggle-status"
+        data-url="{% url 'users:toggle_picked_status' item.id %}"
+        data-item-id="{{ item.id }}"
+        data-confirm-message="Подтвердите, что клиент забрал средство?">
+    Клиент забрал средство
+</button>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".toggle-status").forEach(button => {
+        button.onclick = function (event) {
+            event.preventDefault();
+            const confirmMessage = this.getAttribute("data-confirm-message");
+            const url = this.getAttribute("data-url");
+
+            if (confirm(confirmMessage)) {
+                window.location.href = url;
+            }
+        };
+    });
+});
+</script>
+
+                </td>
+
+
+
+
 
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <!-- Кнопка для назначения всех сотрудников -->
-    <button type="submit" name="assign_all" onclick="return confirm('Вы уверены, что хотите обновить назначенных сотрудников?')" class="btn btn-primary">Назначить сотрудников</button>
 
+
+
+
+    <button type="submit" name="assign_all" onclick="return confirm('Вы уверены, что хотите обновить назначенных сотрудников?')" class="btn btn-primary">Назначить сотрудников</button>
 
 </form>
 

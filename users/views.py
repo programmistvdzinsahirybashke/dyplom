@@ -286,23 +286,40 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from orders.models import OrderItem, Status
 
+
+
+
+
+
+
+
 @login_required
 def toggle_picked_status(request, item_id):
-    """Переключает статус между 'Клиент забрал средство' (7) и 'Клиент не забрал средство' (3)"""
     item = get_object_or_404(OrderItem, id=item_id)
 
-    # Проверяем, является ли пользователь администратором
-    if not request.user.is_superuser:
-        messages.error(request, "Недостаточно прав для выполнения этого действия.")
-        return redirect('users:admin_orders')
+    if item.status.id == 3:
+        # Меняем статус на "забрал"
+        item.status = Status.objects.get(id=7)  # Замените на нужный ID
+    elif item.status.id == 7:
+        # Меняем статус на "не забрал"
+        item.status = Status.objects.get(id=3)
 
-    # Определяем новый статус
-    new_status_id = 3 if item.status_id == 7 else 7  # Переключение между 7 и 3
-    item.status_id = new_status_id
     item.save()
+    return redirect(request.META.get('HTTP_REFERER', '/'))  # Перенаправление назад
 
-    messages.success(request, f"Статус задачи №{item_id} изменен.")
-    return redirect(request.META.get("HTTP_REFERER", "users:admin_orders"))
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
