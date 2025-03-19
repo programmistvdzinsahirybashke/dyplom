@@ -315,6 +315,37 @@ def toggle_picked_status(request, item_id):
 
 
 
+from django.shortcuts import redirect
+from django.contrib import messages
+from orders.models import OrderItem, Status
+
+
+def toggle_all_tasks_status(request, order_id):
+    # Получаем заказ по ID
+    order = get_object_or_404(Order, id=order_id)
+
+    # Получаем все элементы (задачи) в заказе
+    order_items = OrderItem.objects.filter(order=order)
+
+    # Проверяем, какой статус у первой задачи в заказе
+    if order_items.exists():
+        # Если задача имеет статус 7, то сменим все на статус 3
+        if order_items.first().status.id == 7:
+            new_status = 3
+        else:
+            # Если задачи имеют статус 3, меняем на 7
+            new_status = 7
+
+        # Получаем новый статус из базы данных
+        status = Status.objects.get(id=new_status)
+
+        # Обновляем статус всех задач в заказе
+        for item in order_items:
+            item.status = status
+            item.save()
+
+    # Перенаправляем обратно на страницу, с которой был запрос
+    return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
 
