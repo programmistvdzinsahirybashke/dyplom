@@ -194,11 +194,16 @@ document.addEventListener("DOMContentLoaded", function () {
         </tbody>
     </table>
 
-<button class="btn btn-warning btn-sm"
+
+    
+    <button type="submit" name="assign_all" onclick="return confirm('Вы уверены, что хотите обновить назначенных сотрудников?')" class="btn btn-primary">Назначить сотрудников</button>
+
+
+<button class="btn btn-primary"
         id="toggle-all-status"
         data-url="{% url 'users:toggle_all_tasks_status' order.id %}"
         data-confirm-message="Вы уверены, что хотите изменить статус всех задач?">
-    Изменить статус всех задач
+    Изменить статус всех задач (Выдан/Выполнено)
 </button>
 
 <script>
@@ -218,13 +223,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 </script>
-
-
-
-
-    <button type="submit" name="assign_all" onclick="return confirm('Вы уверены, что хотите обновить назначенных сотрудников?')" class="btn btn-primary">Назначить сотрудников</button>
-
-
 
 </script>
 

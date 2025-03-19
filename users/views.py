@@ -320,6 +320,8 @@ from django.contrib import messages
 from orders.models import OrderItem, Status
 
 
+
+
 def toggle_all_tasks_status(request, order_id):
     # Получаем заказ по ID
     order = get_object_or_404(Order, id=order_id)
@@ -327,22 +329,24 @@ def toggle_all_tasks_status(request, order_id):
     # Получаем все элементы (задачи) в заказе
     order_items = OrderItem.objects.filter(order=order)
 
-    # Проверяем, какой статус у первой задачи в заказе
-    if order_items.exists():
-        # Если задача имеет статус 7, то сменим все на статус 3
-        if order_items.first().status.id == 7:
-            new_status = 3
-        else:
-            # Если задачи имеют статус 3, меняем на 7
-            new_status = 7
+    # Проверяем, что все задачи имеют одинаковый статус, равный либо 3, либо 7
+    statuses = order_items.values_list('status__id', flat=True).distinct()
 
-        # Получаем новый статус из базы данных
+    # Если все задачи имеют одинаковый статус, и этот статус равен либо 3, либо 7
+    if len(statuses) == 1 and statuses[0] in [3, 7]:
+        new_status = 7 if statuses[0] == 3 else 3
         status = Status.objects.get(id=new_status)
 
         # Обновляем статус всех задач в заказе
         for item in order_items:
             item.status = status
             item.save()
+
+        # Добавляем сообщение об успешном изменении статусов
+        messages.success(request, f"Статусы изменены (заказ №{order_id}).")
+    else:
+        # Если хотя бы одна задача не имеет статус 3 или 7, выводим сообщение
+        messages.warning(request, f"Статусы не изменены (заказ №{order_id}). У всех задач должен быть статус 'Выполнено' или 'Выдан'.")
 
     # Перенаправляем обратно на страницу, с которой был запрос
     return redirect(request.META.get("HTTP_REFERER", "/"))
