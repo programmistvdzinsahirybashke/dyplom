@@ -24,7 +24,7 @@
 <!-- Общая выручка -->
 <h3>Общая сумма за месяц: {{ total_revenue }} руб.</h3>
 <h3>Средний чек за месяц: {{ avg_order_value }} руб.</h3>
-<h3>Процент выполненных заказов за месяц: {{ completed_orders_percentage }}%</h3>
+<h3>Процент завершенных заказов за месяц: {{ completed_orders_percentage }}%</h3>
 
 
 <!-- Таблица заказов по статусам -->
@@ -87,7 +87,7 @@
 <h3>Самая популярная услуга за месяц: {{ most_popular_service.product__service_name }} | {{ most_popular_service.product__category__category_name }}</h3> <!-- Если это объект с полем service_name -->
 <h3>Самый загруженный день за месяц: {{ busiest_day }}</h3>
 <h3>Количество новых клиентов за месяц: {{ new_customers_count }}</h3>
-<h3>Среднее время выполнения заказа за месяц: {{ avg_order_completion_time }} ч.</h3>
+<h3>Среднее время выполнения 1 услуги за месяц: {{ avg_order_completion_time }} ч.</h3>
 <h3>Доля повторных заказов за месяц: {{ repeat_order_percentage }}%</h3>
 
 <!-- Подключение Chart.js -->

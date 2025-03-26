@@ -155,7 +155,8 @@ def admin_orders(request):
     if status_filter:
         orders = orders.filter(status__id=status_filter)
 
-    orders = orders.order_by('-id' if sort_order == 'desc' else 'id')
+    # Сортировка по дате создания заказа
+    orders = orders.order_by('-created_timestamp' if sort_order == 'desc' else 'created_timestamp')
 
     # Собираем доступных сотрудников для каждой услуги
     available_employees = {}
