@@ -78,3 +78,11 @@ body {
 .card-body .mt-auto {
     margin-top: auto; /* Кнопка и цена всегда внизу */
 }
+
+table {
+border: 1px solid black; /* Рамка вокруг таблицы */
+border-collapse: collapse; /* Отображать только одинарные линии */
+}
+th, td {
+border: 1px solid black; /* Граница вокруг ячеек */
+}

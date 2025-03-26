@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth, messages
-from django.db.models import Prefetch, Sum, F
+from django.db.models import Prefetch, Sum, F, ExpressionWrapper, DecimalField
+from django.db.models.functions import TruncDate
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -452,3 +453,129 @@ def staff_orders(request):
     }
 
     return render(request, 'users/staff_orders.html', context)
+
+
+from django.shortcuts import render
+from django.views import View
+from django.db.models import Count, Sum
+
+from datetime import timedelta
+from django.utils import timezone
+from datetime import timedelta
+from django.utils import timezone
+from django.shortcuts import render
+from django.db.models import Count, Sum, F
+from datetime import timedelta
+from django.utils import timezone
+from django.shortcuts import render
+from django.db.models import Count, Sum, F
+from datetime import timedelta
+from django.utils import timezone
+from django.db.models import Count, Sum, F
+from django.db.models.functions import TruncDate  # Для обрезки времени
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Count, Sum, F
+from django.db.models.functions import TruncDate  # Для обрезки времени
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import F, Sum
+from django.db.models.functions import TruncDate
+from django.db.models import F, Sum, Count
+from django.db.models.functions import TruncDate
+from django.utils import timezone
+from datetime import timedelta
+
+from django.db.models import Count, Sum, F
+from django.db.models.functions import TruncDate
+from django.utils import timezone
+from datetime import timedelta
+
+from django.db.models import Count, Sum, F
+from django.db.models.functions import TruncDate
+from django.utils import timezone
+from datetime import timedelta
+def create_report(request):
+    # Получаем выбранный месяц и год (или используем текущие)
+    selected_month = int(request.GET.get('month', timezone.now().month))
+    selected_year = int(request.GET.get('year', timezone.now().year))
+
+    # Количество заказов по статусам
+    orders_by_status = Order.objects.values("status__status_name").annotate(count=Count("id"))
+
+    # Количество услуг по статусам
+    services_by_status = OrderItem.objects.values("status__status_name").annotate(count=Count("id"))
+
+    # Выручка по дням с учетом выбранного месяца и года
+    revenue_by_date = OrderItem.objects.annotate(
+        total_price=F('price') * F('quantity')  # Вычисляем сумму за каждый заказ
+    ).annotate(
+        created_date=TruncDate('created_timestamp')  # Оставляем только дату, без времени
+    ).filter(
+        created_date__year=selected_year,
+        created_date__month=selected_month
+    ).values('created_date').annotate(
+        total_revenue=Sum('total_price'),  # Суммируем по датам
+        total_services=Count('id')  # Считаем количество заказанных услуг
+    ).order_by('created_date')
+
+    # Составляем полный список всех дней в выбранном месяце
+    from calendar import monthrange
+    start_date = timezone.datetime(selected_year, selected_month, 1).date()
+    end_date = timezone.datetime(selected_year, selected_month, monthrange(selected_year, selected_month)[1]).date()
+
+    # Генерация всех дней в месяце
+    date_range = []
+    current_date = start_date
+    while current_date <= end_date:
+        date_range.append(current_date)
+        current_date += timedelta(days=1)
+
+    # Преобразуем выручку по дням в словарь с датами как ключами
+    revenue_dict = {item['created_date']: item for item in revenue_by_date}
+
+    # Формируем окончательный список выручки по дням
+    revenue_by_date = [
+        {
+            'date': date.strftime('%Y-%m-%d'),
+            'total_revenue': revenue_dict.get(date, {}).get('total_revenue', 0),
+            'total_services': revenue_dict.get(date, {}).get('total_services', 0)
+        }
+        for date in date_range
+    ]
+
+    # Считаем итоговую сумму заказанных услуг и их общей стоимости
+    total_services_count = sum(item['total_services'] for item in revenue_by_date)
+    total_revenue = sum(item['total_revenue'] for item in revenue_by_date)
+
+    # Список месяцев
+    months = [
+        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+    ]
+
+    # Получаем текущий месяц и год
+    current_year = timezone.now().year
+
+    # Общая сумма всех заказов
+    total_revenue_all = OrderItem.objects.annotate(
+        total_price=F('price') * F('quantity')
+    ).aggregate(total=Sum('total_price'))["total"] or 0
+
+
+
+
+    context = {
+        "orders_by_status": list(orders_by_status),
+        "services_by_status": list(services_by_status),
+        "revenue_by_date": revenue_by_date,
+        "total_revenue": total_revenue_all,
+        "total_services_count": total_services_count,
+        "total_revenue_month": total_revenue,
+        "months": months,
+        "selected_month": selected_month,
+        "selected_year": selected_year,
+        "current_year": current_year
+    }
+
+    return render(request, 'users/reports.html', context)

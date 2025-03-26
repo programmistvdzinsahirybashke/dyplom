@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Отчеты по заказам</h2>
+
+<!-- Форма для выбора месяца -->
+<form method="get" action="">
+    <label for="month">Выберите месяц:</label>
+    <select name="month" id="month">
+        {% for i in months %}
+        <option value="{{ forloop.counter }}" {% if forloop.counter == selected_month %}selected{% endif %}>{{ i }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="year">Выберите год:</label>
+    <select name="year" id="year">
+        <option value="{{ current_year }}" {% if selected_year == current_year %}selected{% endif %}>{{ current_year }}</option>
+        <option value="{{ current_year|add:"-1" }}" {% if selected_year == current_year|add:"-1" %}selected{% endif %}>{{ current_year|add:"-1" }}</option>
+    </select>
+
+    <button type="submit">Показать</button>
+</form>
+
+<!-- Общая выручка -->
+<h3>Общая сумма заказов: {{ total_revenue }} руб.</h3>
+
+<!-- Таблица заказов по статусам -->
+<h3>Количество заказов по статусам</h3>
+<table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr>
+        <th>Статус</th>
+        <th>Количество</th>
+    </tr>
+    {% for item in orders_by_status %}
+    <tr>
+        <td>{{ item.status__status_name }}</td>
+        <td>{{ item.count }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- Таблица услуг по статусам -->
+<h3>Количество услуг по статусам</h3>
+<table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr>
+        <th>Статус</th>
+        <th>Количество</th>
+    </tr>
+    {% for item in services_by_status %}
+    <tr>
+        <td>{{ item.status__status_name }}</td>
+        <td>{{ item.count }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- Таблица выручки по дням -->
+<h3>Выручка по дням (Месяц: {{ selected_month }}. Год: {{ selected_year }})</h3>
+<table border="1" style="border-collapse: collapse; width: 100%;">
+    <tr>
+        <th>Дата</th>
+        <th>Выручка (руб.)</th>
+        <th>Количество заказанных услуг</th>
+    </tr>
+    {% for item in revenue_by_date %}
+    <tr>
+        <td>{{ item.date }}</td>
+        <td>{{ item.total_revenue }}</td>
+        <td>{{ item.total_services }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td><strong>Итого</strong></td>
+        <td><strong>{{ total_revenue_month }}</strong></td>
+        <td><strong>{{ total_services_count }}</strong></td>
+    </tr>
+</table>
+
+
+
+{% endblock %}
+
+
