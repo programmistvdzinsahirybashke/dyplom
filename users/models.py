@@ -13,6 +13,7 @@ class User(AbstractUser):
 
     image = models.ImageField(upload_to='users_image', blank=True, null=True, verbose_name='Аватар')
 
+
 # Модель Employee
 class Employee(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')

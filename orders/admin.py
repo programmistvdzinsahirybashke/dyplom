@@ -1,10 +1,7 @@
-import logging
 from django.contrib import admin
 from goods.models import Service
 from users.models import Employee
 from .models import Order, OrderItem, Status
-
-
 
 # Регистрация модели статусов
 admin.site.register(Status)

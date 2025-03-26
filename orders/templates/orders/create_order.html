@@ -14,6 +14,7 @@
             <!-- Закончилась разметка корзины -->
         </div>
     </div>
+
     <!-- Детали заказа -->
     <div class="container">
         <h3 class="text-center">Детали заказа</h3>
@@ -63,7 +64,6 @@
                                 </div>
                             {% endif %}
                             <input type="date" id="date" name="delivery_date" required>
-<!--                            <label for="time">Время:</label>-->
                             {% if form.time.errors %}
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     {{ form.time.errors }}
@@ -75,94 +75,84 @@
 
                             <input type="hidden" id="delivery_datetime" name="delivery_datetime">
 
-
                             <script>
                                 document.addEventListener('DOMContentLoaded', () => {
-    const timeSelect = document.getElementById('time');
-    const dateInput = document.getElementById('date');
-    const deliveryDateTimeInput = document.getElementById('delivery_datetime'); // Добавьте этот input в HTML, если его нет
-    const startTime = 8; // Начало рабочего времени (8:00)
-    const endTime = 16; // Конец рабочего времени (16:00)
-    const interval = 15; // Интервал времени в минутах
+                                    const timeSelect = document.getElementById('time');
+                                    const dateInput = document.getElementById('date');
+                                    const deliveryDateTimeInput = document.getElementById('delivery_datetime');
+                                    const startTime = 8;
+                                    const endTime = 16;
+                                    const interval = 15;
 
-    function populateTimeOptions(selectedDate) {
-        timeSelect.innerHTML = ''; // Очистка предыдущих опций
+                                    function populateTimeOptions(selectedDate) {
+                                        timeSelect.innerHTML = '';
 
-        // Запрашиваем занятые времена у сервера
-        fetch(`/orders/api/get-occupied-times/?date=${selectedDate}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Ошибка HTTP: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                const occupiedTimes = data.occupied_times || [];
-                console.log('Занятые времена:', occupiedTimes);
+                                        fetch(`/orders/api/get-occupied-times/?date=${selectedDate}`)
+                                            .then(response => {
+                                                if (!response.ok) {
+                                                    throw new Error(`Ошибка HTTP: ${response.status}`);
+                                                }
+                                                return response.json();
+                                            })
+                                            .then(data => {
+                                                const occupiedTimes = data.occupied_times || [];
+                                                console.log('Занятые времена:', occupiedTimes);
 
-                // Генерация доступных временных интервалов
-                for (let hour = startTime; hour < endTime; hour++) {
-                    for (let minutes = 0; minutes < 60; minutes += interval) {
-                        const time = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                                                for (let hour = startTime; hour < endTime; hour++) {
+                                                    for (let minutes = 0; minutes < 60; minutes += interval) {
+                                                        const time = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 
-                        // Исключаем обеденный перерыв с 12:00 до 13:00
-                        if (hour === 12 || (hour === 13 && minutes === 0)) continue;
+                                                        if (hour === 12 || (hour === 13 && minutes === 0)) continue;
 
-                        const option = document.createElement('option');
-                        option.value = time;
-                        option.textContent = time;
+                                                        const option = document.createElement('option');
+                                                        option.value = time;
+                                                        option.textContent = time;
 
-                        // Проверяем, занято ли это время
-                        if (occupiedTimes.includes(time)) {
-                            option.disabled = true; // Отключаем занятые времена
-                        }
+                                                        if (occupiedTimes.includes(time)) {
+                                                            option.disabled = true;
+                                                        }
 
-                        timeSelect.appendChild(option);
-                    }
-                }
+                                                        timeSelect.appendChild(option);
+                                                    }
+                                                }
 
-                // Если все опции недоступны
-                if (!timeSelect.innerHTML.trim()) {
-                    const noAvailableOption = document.createElement('option');
-                    noAvailableOption.textContent = 'Нет доступных времён';
-                    noAvailableOption.disabled = true;
-                    noAvailableOption.selected = true;
-                    timeSelect.appendChild(noAvailableOption);
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка при получении данных о занятых временах:', error);
-            });
-    }
+                                                if (!timeSelect.innerHTML.trim()) {
+                                                    const noAvailableOption = document.createElement('option');
+                                                    noAvailableOption.textContent = 'Нет доступных времён';
+                                                    noAvailableOption.disabled = true;
+                                                    noAvailableOption.selected = true;
+                                                    timeSelect.appendChild(noAvailableOption);
+                                                }
+                                            })
+                                            .catch(error => {
+                                                console.error('Ошибка при получении данных о занятых временах:', error);
+                                            });
+                                    }
 
-    // Установка минимальной даты на сегодня
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.setAttribute('min', today);
+                                    const today = new Date().toISOString().split('T')[0];
+                                    dateInput.setAttribute('min', today);
 
-    // Событие при изменении даты
-    dateInput.addEventListener('change', (event) => {
-        const selectedDate = event.target.value;
-        if (selectedDate) {
-            populateTimeOptions(selectedDate);
-        }
-    });
+                                    dateInput.addEventListener('change', (event) => {
+                                        const selectedDate = event.target.value;
+                                        if (selectedDate) {
+                                            populateTimeOptions(selectedDate);
+                                        }
+                                    });
 
-    // Обновление скрытого поля даты и времени
-    timeSelect.addEventListener('change', () => {
-        const selectedDate = dateInput.value;
-        const selectedTime = timeSelect.value;
-        if (selectedDate && selectedTime) {
-            if (deliveryDateTimeInput) {
-                deliveryDateTimeInput.value = `${selectedDate}T${selectedTime}`;
-            } else {
-                console.error("Элемент с id 'delivery_datetime' не найден. Проверьте HTML-код.");
-            }
-        }
-    });
+                                    timeSelect.addEventListener('change', () => {
+                                        const selectedDate = dateInput.value;
+                                        const selectedTime = timeSelect.value;
+                                        if (selectedDate && selectedTime) {
+                                            if (deliveryDateTimeInput) {
+                                                deliveryDateTimeInput.value = `${selectedDate}T${selectedTime}`;
+                                            } else {
+                                                console.error("Элемент с id 'delivery_datetime' не найден.");
+                                            }
+                                        }
+                                    });
 
-    // Инициализация времён для минимальной даты (сегодня)
-    populateTimeOptions(today);
-});
+                                    populateTimeOptions(today);
+                                });
                             </script>
                         </div>
                         <div class="col-md-12 mb-3">
@@ -230,19 +220,16 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleDeliveryAddress() {
+            const deliveryAddressField = document.getElementById('id_delivery_address');
+            const pickupOption = document.getElementById('id_requires_delivery_pickup').checked;
+
+            if (pickupOption) {
+                deliveryAddressField.value = '';
+            }
+        }
+    </script>
 </div>
-
-<script>
-function toggleDeliveryAddress() {
-    const deliveryAddressField = document.getElementById('id_delivery_address');
-    const pickupOption = document.getElementById('id_requires_delivery_pickup').checked;
-
-    if (pickupOption) {
-        deliveryAddressField.value = ''; // Очистить поле адреса
-    }
-}
-</script>
-
-
-
 {% endblock %}

@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 from django.contrib import messages
 from django.db import transaction
 from django.forms import ValidationError
@@ -7,6 +6,7 @@ from django.shortcuts import redirect, render
 from carts.models import Cart
 from orders.forms import CreateOrderForm
 from orders.models import Order, OrderItem
+from django.http import JsonResponse
 from datetime import datetime
 
 
@@ -79,11 +79,6 @@ def create_order(request):
         'order':True,
     }
     return render(request, 'orders/create_order.html', context=context)
-
-
-from django.http import JsonResponse
-from .models import Order
-from datetime import datetime
 
 
 def get_occupied_times(request):

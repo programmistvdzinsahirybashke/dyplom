@@ -1,9 +1,5 @@
 import re
-
 from django import forms
-from django.db.models import TimeField
-from orders.models import Order, OrderItem, Status
-
 
 
 class CreateOrderForm(forms.Form):
@@ -21,9 +17,9 @@ class CreateOrderForm(forms.Form):
     delivery_time = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}))
     payment_on_get = forms.ChoiceField(
         choices=[
-             ("0", 'False'),
-             ("1", 'True'),
-             ],
+            ("0", 'False'),
+            ("1", 'True'),
+        ],
     )
     comment = forms.CharField(required=False)
 

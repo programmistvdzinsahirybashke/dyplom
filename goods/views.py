@@ -1,10 +1,6 @@
-from django.contrib.admin.templatetags.admin_list import pagination
-from django.shortcuts import render, get_list_or_404
+from django.shortcuts import render
 from goods.models import Service
-from lib2to3.fixes.fix_input import context
 from django.core.paginator import Paginator
-from django.http import Http404
-
 from goods.utils import q_search
 
 
@@ -22,7 +18,6 @@ def catalog(request, category_slug=None):
     else:
         goods = Service.objects.filter(category__slug=category_slug)
 
-
     if on_sale:
         goods = goods.filter(discount__gt=0)
 
@@ -39,12 +34,12 @@ def catalog(request, category_slug=None):
     }
     return render(request, "goods/catalog.html", context)
 
-def product(request, product_slug):
 
+def product(request, product_slug):
     product = Service.objects.get(slug=product_slug)
 
     context = {
-        'product':product
+        'product': product
     }
 
     return render(request, 'goods/product.html', context=context)

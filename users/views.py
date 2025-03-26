@@ -1,17 +1,17 @@
-from django.contrib.auth.decorators import login_required
 from django.contrib import auth, messages
-from django.db.models import Prefetch, Sum, F, ExpressionWrapper, DecimalField
-from django.db.models.functions import TruncDate
-from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.db.models import Q
-
 from carts.models import Cart
-from goods.models import Category
 from users.forms import UserLoginForm, UserRegistrationForm, ProfileForm
-
 from orders.models import Order, OrderItem, Status
+from django.http import QueryDict, Http404, HttpResponseRedirect
+from users.models import User, Employee
+from django.db.models import Count, Sum, Avg, F, ExpressionWrapper, fields, Prefetch, Q
+from django.db.models.functions import TruncDate
+from django.utils import timezone
+from calendar import monthrange
+from datetime import timedelta
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
@@ -87,7 +87,6 @@ def profile(request):
         # Параметры для поиска заказов
     order_search = request.GET.get('order_search', '')
 
-
     # Извлечение заказов пользователя
     orders = Order.objects.filter(user=request.user).prefetch_related(
         Prefetch(
@@ -125,13 +124,6 @@ def logout(request):
     messages.success(request, f'Вы вышли из аккаунта')
     auth.logout(request)
     return redirect(reverse('repair_app:index'))
-
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from orders.models import Order, OrderItem
-from orders.models import Order, OrderItem, Status, Employee  # Убедитесь, что Employee импортирован
-from django.http import QueryDict
 
 
 @login_required
@@ -249,7 +241,6 @@ def admin_orders(request):
             except Order.DoesNotExist:
                 pass
 
-
     context = {
         'title': 'Все заказы',
         'orders': orders,
@@ -266,9 +257,6 @@ def admin_orders(request):
     return render(request, 'users/admin_orders.html', context)
 
 
-from django.http import HttpResponseRedirect
-
-
 def update_employee(request, order_id):
     order = Order.objects.get(id=order_id)
     employee_id = request.POST.get('employee')
@@ -280,19 +268,6 @@ def update_employee(request, order_id):
         orderitem.save()
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
-
-
-
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from orders.models import OrderItem, Status
-
-
-
-
-
-
 
 
 @login_required
@@ -308,20 +283,6 @@ def toggle_picked_status(request, item_id):
 
     item.save()
     return redirect(request.META.get('HTTP_REFERER', '/'))  # Перенаправление назад
-
-
-
-
-
-
-
-
-
-from django.shortcuts import redirect
-from django.contrib import messages
-from orders.models import OrderItem, Status
-
-
 
 
 def toggle_all_tasks_status(request, order_id):
@@ -348,20 +309,11 @@ def toggle_all_tasks_status(request, order_id):
         messages.success(request, f"Статусы изменены (заказ №{order_id}).")
     else:
         # Если хотя бы одна задача не имеет статус 3 или 7, выводим сообщение
-        messages.warning(request, f"Статусы не изменены (заказ №{order_id}). У всех задач должен быть статус 'Выполнено' или 'Выдан'.")
+        messages.warning(request,
+                         f"Статусы не изменены (заказ №{order_id}). У всех задач должен быть статус 'Выполнено' или 'Выдан'.")
 
     # Перенаправляем обратно на страницу, с которой был запрос
     return redirect(request.META.get("HTTP_REFERER", "/"))
-
-
-
-
-
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.http import Http404
-from django.db.models import Q
 
 
 @login_required
@@ -407,7 +359,6 @@ def staff_orders(request):
         order_item_id = request.POST.get('order_item_id')
         new_status_name = request.POST.get('new_status')
 
-
         if order_item_id and new_status_name:
             try:
                 order_id = request.POST.get('order_id')
@@ -426,12 +377,10 @@ def staff_orders(request):
                     messages.success(request, f'Отменено выполнение задачи (Заказ №{order_id} заявка №{order_item_id})')
 
                 if new_status.status_name == "Выполнено":
-
                     messages.success(request, f'Задача выполнена(Заказ №{order_id} заявка №{order_item_id})')
 
                 # Сохраняем изменения
                 order_item.save()
-
 
                 # Перенаправляем с сохранением параметров
                 redirect_url = f"{request.path}?search={search_query}&status={status_filter}&sort={sort_order}"
@@ -456,17 +405,11 @@ def staff_orders(request):
     return render(request, 'users/staff_orders.html', context)
 
 
-from django.shortcuts import render
-from users.models import User, Employee
-from django.db.models import F, Count, Sum, Avg
-from django.utils import timezone
-from django.db.models import F, ExpressionWrapper, fields
-from calendar import monthrange
-from datetime import timedelta
-from django.db.models.functions import TruncDate
-
-
+@login_required
 def create_report(request):
+    if not request.user.is_superuser:
+        raise Http404("Доступ ограничен: только для администраторов.")
+
     selected_month = int(request.GET.get('month', timezone.now().month))
     selected_year = int(request.GET.get('year', timezone.now().year))
 
@@ -543,7 +486,7 @@ def create_report(request):
         created_timestamp__month=selected_month
     ).values(
         'product__service_name',
-        'product__category__category_name' # Исправлено с name на service_name
+        'product__category__category_name'  # Исправлено с name на service_name
     ).annotate(
         count=Count('id')
     ).order_by('-count').first()

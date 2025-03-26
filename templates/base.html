@@ -6,16 +6,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static "deps/css/bootstrap/bootstrap.min.css" %}">
-    <link rel="stylesheet" href="{% static "deps/css/my_css.css"%}">
+    <link rel="stylesheet" href="{% static "deps/css/my_css.css" %}">
     <!-- Стиль footer-a для главной страницы -->
-
     {% block css %} {% endblock %}
-
     <!-- Favicons for different platforms -->
-    <link rel="apple-touch-icon" sizes="180x180" href="{% static "deps/favicon/settings.png"%}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static "deps/favicon/settings.png"%}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static  "deps/favicon/settings.png"%}">
-    <link rel="manifest" href="{% static  "deps/favicon/site.webmanifest" %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static "deps/favicon/settings.png" %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static "deps/favicon/settings.png" %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static "deps/favicon/settings.png" %}">
+    <link rel="manifest" href="{% static "deps/favicon/site.webmanifest" %}">
     <title>{{ title }}</title>
 </head>
 
@@ -23,69 +21,52 @@
     <header>
         <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
             <div class="container">
-
-
-
-                        <a class="navbar-brand d-flex align-items-center" href="{% url 'repair_app:index' %}">
-            <img src="{% static "deps/favicon/settings.png" %}" alt="Логотип" width="40" height="40" class="me-2">
-            RepAir
-        </a>
-
-
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand d-flex align-items-center" href="{% url 'repair_app:index' %}">
+                    <img src="{% static "deps/favicon/settings.png" %}" alt="Логотип" width="40" height="40" class="me-2">
+                    RepAir
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        li class="nav-item">
-                           <a class="nav-link  text-white" href="{% url "catalog:index" 'all' %}">Каталог</a>
+                        <li class="nav-item">
+                            <a style="margin-left: 95px;" class="nav-link text-white"  href="{% url "catalog:index" 'all' %}">Каталог</a>
                         </li>
-
-                        <li class="nav-item dropdown ">
-                            <a class="nav-link dropdown-toggle text-white" href="#" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                Информация
-                            </a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Информация</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item  text-white" href="{% url "repair_app:zakaz_and_dostavka" %}">Заказ и оплата</a></li>
-                                <li><a class="dropdown-item  text-white" href="{% url "repair_app:contacts" %}">Контактная информация</a></li>
-                                <li><a class="dropdown-item  text-white" href="{% url "repair_app:about" %}">О нас</a></li>
+                                <li><a class="dropdown-item text-white" href="{% url "repair_app:zakaz_and_dostavka" %}">Заказ и оплата</a></li>
+                                <li><a class="dropdown-item text-white" href="{% url "repair_app:contacts" %}">Контактная информация</a></li>
+                                <li><a class="dropdown-item text-white" href="{% url "repair_app:about" %}">О нас</a></li>
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link  text-white" href="{% url "user:users_cart" %}">Корзина</a>
+                            <a class="nav-link text-white" href="{% url "user:users_cart" %}">Корзина</a>
                         </li>
                         {% if not user.is_authenticated %}
                             <li class="nav-item">
-                                <a class="nav-link  text-white" href="{% url "users:login" %}">Войти</a>
+                                <a class="nav-link text-white" href="{% url "users:login" %}">Войти</a>
                             </li>
                         {% else %}
-                            <li class="nav-item dropdown ">
-                                <a class="nav-link dropdown-toggle text-white" href="#" role="button"
-                                   data-bs-toggle="dropdown" aria-expanded="false">
-                                    Мой профиль
-                                </a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Мой профиль</a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item  text-white" href="{% url "users:profile" %}">Личный кабинет</a>
-                                    </li>
-                                    {% if user.is_superuser  %}
-                                    <li><a class="dropdown-item  text-white" href="{% url "admin:index" %}">Админ панель</a></li>
-                                    <li><a class="dropdown-item  text-white" href="{% url "users:admin_orders" %}">Все заказы</a></li>
+                                    <li><a class="dropdown-item text-white" href="{% url "users:profile" %}">Личный кабинет</a></li>
+                                    {% if user.is_superuser %}
+                                        <li><a class="dropdown-item text-white" href="{% url "admin:index" %}">Админ панель</a></li>
+                                        <li><a class="dropdown-item text-white" href="{% url "users:admin_orders" %}">Все заказы</a></li>
+                                        <li><a class="dropdown-item text-white" href="{% url "users:admin_reports" %}">Отчеты</a></li>
                                     {% elif user.is_staff %}
-                                    <li><a class="dropdown-item  text-white" href="{% url "users:staff_orders" %}">Мои задачи</a></li>
+                                        <li><a class="dropdown-item text-white" href="{% url "users:staff_orders" %}">Мои задачи</a></li>
                                     {% endif %}
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li><a class="dropdown-item  text-white"  onclick="return confirmLogout()" href="{% url "users:logout" %}">Выйти</a></li>
-
-                                            <script>
-                                            function confirmLogout() {
-                                                return confirm("Вы уверены, что хотите выйти?");
-                                            }
-                                            </script>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-white" onclick="return confirmLogout()" href="{% url "users:logout" %}">Выйти</a></li>
+                                    <script>
+                                        function confirmLogout() {
+                                            return confirm("Вы уверены, что хотите выйти?");
+                                        }
+                                    </script>
                                 </ul>
                             </li>
                         {% endif %}
@@ -100,47 +81,34 @@
     </header>
     <section>
         <div class="container">
-            <!-- Каталог и корзина с фиксированным расположением на странице -->
             <div class="row mt-1 position-fixed z-3">
-                <!-- Каталог -->
                 <div class="dropdown mb-2">
-                    <button class="btn btn-secondary dropdown-toggle btn-dark" type="button" data-bs-toggle="dropdown"
-                        aria-expanded="false">
+                    <button class="btn btn-secondary dropdown-toggle btn-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Каталог
-                        <img class="mx-1" src="{% static  "deps/icons/grid-fill.svg" %}" alt="Catalog Icon" width="16"
-                            height="16">
+                        <img class="mx-1" src="{% static "deps/icons/grid-fill.svg" %}" alt="Catalog Icon" width="16" height="16">
                     </button>
                     <ul class="dropdown-menu bg-dark" data-bs-theme="dark">
                         {% tag_categories as categories %}
                         {% for category in categories %}
-                        <li><a class="dropdown-item text-white" href="{% url "catalog:index" category.slug %}">{{ category.category_name }}</a></li>
-                         {% endfor %}
+                            <li><a class="dropdown-item text-white" href="{% url "catalog:index" category.slug %}">{{ category.category_name }}</a></li>
+                        {% endfor %}
                     </ul>
                 </div>
-                <!-- Значек корзины, вызывает модальное окно -->
                 {% block modal_cart %}{% endblock %}
-                <!-- Закончилась разметка модального окна -->
             </div>
         </div>
-        <!-- Контент -->
         <div class="container">
             <div class="row mt-1">
-                <div class="col-lg-2">
-                    <!-- Пустой блок на Ваше усмотрение -->
-                </div>
+                <div class="col-lg-2"></div>
                 <div class="col-lg-10">
-                    <!-- Контент на странице -->
-                      {% include "includes/notifications.html" %}
-
-                      {% block content %}
-                       {% endblock %}
+                    {% include "includes/notifications.html" %}
+                    {% block content %}{% endblock %}
                 </div>
             </div>
         </div>
     </section>
-    {% block footer %}
-    {% endblock %}
-    <script src= "{% static "deps/js/jquery/jquery-3.7.0.min.js" %}" ></script>
-    <script src= "{% static "deps/js/jquery-ajax.js" %}" ></script>
-    <script src= "{% static "deps/js/bootstrap/bootstrap.bundle.min.js" %}" ></script>
+    {% block footer %}{% endblock %}
+    <script src="{% static "deps/js/jquery/jquery-3.7.0.min.js" %}"></script>
+    <script src="{% static "deps/js/jquery-ajax.js" %}"></script>
+    <script src="{% static "deps/js/bootstrap/bootstrap.bundle.min.js" %}"></script>
 </body>

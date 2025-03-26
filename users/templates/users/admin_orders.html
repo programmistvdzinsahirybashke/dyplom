@@ -41,202 +41,164 @@
             </h2>
             <div id="collapse{{ order.id }}" class="accordion-collapse collapse {% if order == orders.0 %}show{% endif %}" aria-labelledby="heading{{ order.id }}" data-bs-parent="#accordionExample">
                 <div class="accordion-body">
- <form method="POST">
-    {% csrf_token %}
-    <input type="hidden" name="order_id" value="{{ order.id }}">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
 
-    <!-- Форма для изменения заказа -->
-    <div class="mb-3">
-        <label for="status" class="form-label">Статус</label>
-        <select name="status" class="form-select">
-            {% for status in statuses %}
-                <option value="{{ status.id }}" {% if order.status.id == status.id %}selected{% endif %}>
-                    {{ status.status_name }}
-                </option>
-            {% endfor %}
-        </select>
-    </div>
+                        <!-- Форма для изменения заказа -->
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Статус</label>
+                            <select name="status" class="form-select">
+                                {% for status in statuses %}
+                                    <option value="{{ status.id }}" {% if order.status.id == status.id %}selected{% endif %}>
+                                        {{ status.status_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
 
+                        <label for="requires_delivery" class="form-label">Требуется выезд</label>
+                        <input type="checkbox" name="requires_delivery" disabled {% if order.requires_delivery %}checked{% endif %}>
 
-        <label for="requires_delivery" class="form-label">Требуется выезд</label>
-        <input type="checkbox" name="requires_delivery" disabled {% if order.requires_delivery %}checked{% endif %}>
+                        <div class="mb-3">
+                            <label for="payment_method" class="form-label">Оплата при получении</label>
+                            <input type="checkbox" name="payment_method" disabled  {% if order.payment_on_get %}checked{% endif %} >
+                        </div>
 
+                        <div class="mb-3">
+                            {% if order.requires_delivery %}
+                                <label for="delivery_address" class="form-label">Адрес доставки</label>
+                                <input type="text" class="form-control" name="delivery_address" value="{{ order.delivery_address }}">
+                            {% else %}
+                                <label for="delivery_address" class="form-label">Адрес для сдачи средства в сервис: </label>
+                                <input type="text" class="form-control" name="delivery_address" value='г. Альметьевск, ул. Примерная 116' disabled>
+                            {% endif %}
+                        </div>
 
-   <div class="mb-3">
-        <label for="payment_method" class="form-label">Оплата при получении</label>
-        <input type="checkbox" name="payment_method" disabled  {% if order.payment_on_get %}checked{% endif %} >
-    </div>
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Комментарий заказчика</label>
+                            <textarea class="form-control" name="comment">{{ order.comment }}</textarea>
+                        </div>
 
+                        <label for="Имя фамилия клиента" class="form-label">Заказчик: {{ order.user.first_name }} {{ order.user.last_name }}</label>
 
-    <div class="mb-3">
-        {% if order.requires_delivery %}
-            <label for="delivery_address" class="form-label">Адрес доставки</label>
-            <input type="text" class="form-control" name="delivery_address" value="{{ order.delivery_address }}">
-        {% else %}
-            <label for="delivery_address" class="form-label">Адрес для сдачи средства в сервис: </label>
-            <input type="text" class="form-control" name="delivery_address" value='г. Альметьевск, ул. Примерная 116' disabled>
-        {% endif %}
+                        <div class="mb-3">
+                            <label for="Номер телефона" class="form-label">Номер телефона заказчика: {{ order.phone_number }}</label>
+                        </div>
 
-    </div>
+                        <button type="submit" name="update_order" onclick="return confirmOrderUpdate()" class="btn btn-primary">Сохранить изменения</button>
+                        <script>
+                            function confirmOrderUpdate() {
+                                return confirm("Вы уверены, что хотите обновить данные заказа?");
+                            }
+                        </script>
+                    </form>
 
-    <div class="mb-3">
-        <label for="comment" class="form-label">Комментарий заказчика</label>
-        <textarea class="form-control" name="comment">{{ order.comment }}</textarea>
-    </div>
+                    <p><strong>Состав заказа:</strong></p>
+                    <table class="table table-dark table-hover">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="order_id" value="{{ order.id }}">
 
-     <label for="Имя фамилия клиента" class="form-label">Заказчик: {{ order.user.first_name }} {{ order.user.last_name }}</label>
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Товар</th>
+                                        <th>Кол-во</th>
+                                        <th>Цена</th>
+                                        <th>Общая стоимость</th>
+                                        <th>Статус</th>
+                                        <th>Дата выполнения</th>
+                                        <th>Назначить сотрудника</th>
+                                        <th>Статус выдачи</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in order.orderitem_set.all %}
+                                    <tr>
+                                        <td class="tovar-column">{{ item.product.service_name }} | {{ item.product.category }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>{{ item.price }}</td>
+                                        <td class="fullprice-column">{{ item.quantity|multiply:item.price|floatformat:2 }} руб.</td>
+                                        <td>{{ item.status.status_name }}</td>
+                                        <td>{{ item.work_ended_datetime|default:"-" }}</td>
+                                        <td>
+                                            <!-- Выпадающий список для назначения сотрудника на одну услугу -->
+                                            <select name="employee_{{ item.id }}" class="form-select">
+                                                <option value="">Выберите сотрудника</option>
+                                                {% for employee in available_employees|get_item:item.id %}
+                                                    <option value="{{ employee.id }}" {% if item.employee and item.employee.id == employee.id %}selected{% endif %}>
+                                                        {{ employee.user.first_name }} {{ employee.user.last_name }}
+                                                        {% with in_progress_count=employee_statuses|get_item:employee.id %}
+                                                            - {{ in_progress_count }} задач в работе
+                                                        {% endwith %}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-danger btn-sm toggle-status"
+                                                    data-url="{% url 'users:toggle_picked_status' item.id %}"
+                                                    data-item-id="{{ item.id }}"
+                                                    data-confirm-message="Подтвердите, что клиент НЕ забрал средство?">
+                                                Клиент не забрал средство
+                                            </button>
 
-     <div class="mb-3">
-        <label for="Номер телефона" class="form-label">Номер телефона заказчика: {{ order.phone_number }}</label>
-    </div>
+                                            <button class="btn btn-success btn-sm toggle-status"
+                                                    data-url="{% url 'users:toggle_picked_status' item.id %}"
+                                                    data-item-id="{{ item.id }}"
+                                                    data-confirm-message="Подтвердите, что клиент забрал средство?">
+                                                Клиент забрал средство
+                                            </button>
 
+                                            <script>
+                                                document.addEventListener("DOMContentLoaded", function () {
+                                                    document.querySelectorAll(".toggle-status").forEach(button => {
+                                                        button.onclick = function (event) {
+                                                            event.preventDefault();
+                                                            const confirmMessage = this.getAttribute("data-confirm-message");
+                                                            const url = this.getAttribute("data-url");
 
+                                                            if (confirm(confirmMessage)) {
+                                                                window.location.href = url;
+                                                            }
+                                                        };
+                                                    });
+                                                });
+                                            </script>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
 
-    <button type="submit" name="update_order" onclick="return confirmOrderUpdate()" class="btn btn-primary">Сохранить изменения</button>
-     <script>
-    function confirmOrderUpdate() {
-        return confirm("Вы уверены, что хотите обновить данные заказа?");
-    }
-    </script>
+                            <button type="submit" name="assign_all" onclick="return confirm('Вы уверены, что хотите обновить назначенных сотрудников?')" class="btn btn-primary">Назначить сотрудников</button>
 
-</form>
+                            <button class="btn btn-primary"
+                                    id="toggle-all-status"
+                                    data-url="{% url 'users:toggle_all_tasks_status' order.id %}"
+                                    data-confirm-message="Вы уверены, что хотите изменить статус всех задач?">
+                                Изменить статус всех задач (Выдан/Выполнено)
+                            </button>
 
-<p><strong>Состав заказа:</strong></p>
-<table class="table table-dark table-hover">
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function () {
+                                    document.getElementById("toggle-all-status").onclick = function (event) {
+                                        event.preventDefault();  // Останавливаем стандартное поведение кнопки
 
+                                        const confirmMessage = this.getAttribute("data-confirm-message");
+                                        const url = this.getAttribute("data-url");
 
-
-
-
-<form method="POST">
-    {% csrf_token %}
-    <input type="hidden" name="order_id" value="{{ order.id }}">
-
-    <table class="table table-dark table-hover">
-        <thead>
-            <tr>
-                <th>Товар</th>
-                <th>Кол-во</th>
-                <th>Цена</th>
-                <th>Общая стоимость</th>
-                <th>Статус</th>
-                <th>Дата выполнения</th>
-                <th>Назначить сотрудника</th>
-                <th>Статус выдачи</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in order.orderitem_set.all %}
-            <tr>
-                <td class="tovar-column">{{ item.product.service_name }} | {{ item.product.category }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>{{ item.price }}</td>
-                <td class="fullprice-column">{{ item.quantity|multiply:item.price|floatformat:2 }} руб.</td>
-                <td>{{ item.status.status_name }}</td>
-                <td>{{ item.work_ended_datetime|default:"-" }}</td>
-                <td>
-                    <!-- Выпадающий список для назначения сотрудника на одну услугу -->
-                    <select name="employee_{{ item.id }}" class="form-select">
-                        <option value="">Выберите сотрудника</option>
-                        {% for employee in available_employees|get_item:item.id %}
-                            <option value="{{ employee.id }}" {% if item.employee and item.employee.id == employee.id %}selected{% endif %}>
-                                {{ employee.user.first_name }} {{ employee.user.last_name }}
-                                {% with in_progress_count=employee_statuses|get_item:employee.id %}
-                                    - {{ in_progress_count }} задач в работе
-                                {% endwith %}
-                            </option>
-                        {% endfor %}
-
-                    </select>
-
-                </td>
-
-
-                <td>
-                    <button class="btn btn-danger btn-sm toggle-status"
-                            data-url="{% url 'users:toggle_picked_status' item.id %}"
-        data-item-id="{{ item.id }}"
-        data-confirm-message="Подтвердите, что клиент НЕ забрал средство?">
-    Клиент не забрал средство
-</button>
-
-<button class="btn btn-success btn-sm toggle-status"
-        data-url="{% url 'users:toggle_picked_status' item.id %}"
-        data-item-id="{{ item.id }}"
-        data-confirm-message="Подтвердите, что клиент забрал средство?">
-    Клиент забрал средство
-</button>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".toggle-status").forEach(button => {
-        button.onclick = function (event) {
-            event.preventDefault();
-            const confirmMessage = this.getAttribute("data-confirm-message");
-            const url = this.getAttribute("data-url");
-
-            if (confirm(confirmMessage)) {
-                window.location.href = url;
-            }
-        };
-    });
-});
-</script>
-
-                </td>
-
-
-
-
-
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-
-    
-    <button type="submit" name="assign_all" onclick="return confirm('Вы уверены, что хотите обновить назначенных сотрудников?')" class="btn btn-primary">Назначить сотрудников</button>
-
-
-<button class="btn btn-primary"
-        id="toggle-all-status"
-        data-url="{% url 'users:toggle_all_tasks_status' order.id %}"
-        data-confirm-message="Вы уверены, что хотите изменить статус всех задач?">
-    Изменить статус всех задач (Выдан/Выполнено)
-</button>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("toggle-all-status").onclick = function (event) {
-        event.preventDefault();  // Останавливаем стандартное поведение кнопки
-
-        const confirmMessage = this.getAttribute("data-confirm-message");
-        const url = this.getAttribute("data-url");
-
-        // Проверка подтверждения
-        if (confirm(confirmMessage)) {
-            // Если подтверждено, перенаправляем на нужный URL
-            window.location.href = url;
-        }
-    };
-});
-
-</script>
-
-</script>
-
-
-
-
-</form>
-
-
-
-
-
-
-</table>
+                                        // Проверка подтверждения
+                                        if (confirm(confirmMessage)) {
+                                            // Если подтверждено, перенаправляем на нужный URL
+                                            window.location.href = url;
+                                        }
+                                    };
+                                });
+                            </script>
+                        </form>
+                    </table>
                 </div>
             </div>
         </div>

@@ -9,6 +9,7 @@ class UserLoginForm(AuthenticationForm):
         fields = ['username',
                   'password']
 
+
 class UserRegistrationForm(UserCreationForm):
     class Meta:
         model = User
@@ -19,6 +20,7 @@ class UserRegistrationForm(UserCreationForm):
                   'password1',
                   'password2',
                   )
+
 
 class ProfileForm(UserChangeForm):
     class Meta:

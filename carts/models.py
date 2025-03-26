@@ -6,7 +6,6 @@ from users.models import User
 # Create your models here.
 
 class CartQueryset(models.QuerySet):
-
     def total_price(self):
         return sum(cart.products_price() for cart in self)
 
@@ -14,6 +13,7 @@ class CartQueryset(models.QuerySet):
         if self:
             return sum(cart.quantity for cart in self)
         return 0
+
 
 class Cart(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, blank=True, null=True, verbose_name='Пользователь')
@@ -29,6 +29,7 @@ class Cart(models.Model):
         ordering = ("product",)
 
     objects = CartQueryset().as_manager()
+
     def products_price(self):
         return round(self.product.sell_price() * self.quantity, 2)
 
