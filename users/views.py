@@ -457,67 +457,10 @@ def staff_orders(request):
 
 
 from django.shortcuts import render
-from django.views import View
-from django.db.models import Count, Sum
-
-from datetime import timedelta
-from django.utils import timezone
-from datetime import timedelta
-from django.utils import timezone
-from django.shortcuts import render
-from django.db.models import Count, Sum, F
-from datetime import timedelta
-from django.utils import timezone
-from django.shortcuts import render
-from django.db.models import Count, Sum, F
-from datetime import timedelta
-from django.utils import timezone
-from django.db.models import Count, Sum, F
-from django.db.models.functions import TruncDate  # Для обрезки времени
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Count, Sum, F
-from django.db.models.functions import TruncDate  # Для обрезки времени
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import F, Sum
-from django.db.models.functions import TruncDate
-from django.db.models import F, Sum, Count
-from django.db.models.functions import TruncDate
-from django.utils import timezone
-from datetime import timedelta
-
-from django.db.models import Count, Sum, F
-from django.db.models.functions import TruncDate
-from django.utils import timezone
-from datetime import timedelta
-
-from django.db.models import Count, Sum, F
-from django.db.models.functions import TruncDate
-from django.utils import timezone
-from datetime import timedelta
-
-from django.db.models import Count, Sum, F, Avg
-from django.db.models.functions import TruncDate
-from django.utils import timezone
-from datetime import timedelta
-from calendar import monthrange
-from users.models import User
-from goods.models import Service
-
-
-from django.db.models import Count, F, Sum, Avg
-from django.db.models.functions import TruncDate
-from django.shortcuts import render
-from django.utils import timezone
-from calendar import monthrange
-from datetime import timedelta
 from users.models import User, Employee
-from goods.models import Service
 from django.db.models import F, Count, Sum, Avg
 from django.utils import timezone
 from django.db.models import F, ExpressionWrapper, fields
-from django.db.models.functions import Now
 from calendar import monthrange
 from datetime import timedelta
 from django.db.models.functions import TruncDate
