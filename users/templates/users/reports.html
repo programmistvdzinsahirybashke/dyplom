@@ -3,23 +3,6 @@
 {% block content %}
 <h2>Отчеты по заказам</h2>
 
-<!-- Форма для выбора месяца -->
-<form method="get" action="">
-    <label for="month">Выберите месяц:</label>
-    <select name="month" id="month">
-        {% for i in months %}
-        <option value="{{ forloop.counter }}" {% if forloop.counter == selected_month %}selected{% endif %}>{{ i }}</option>
-        {% endfor %}
-    </select>
-
-    <label for="year">Выберите год:</label>
-    <select name="year" id="year">
-        <option value="{{ current_year }}" {% if selected_year == current_year %}selected{% endif %}>{{ current_year }}</option>
-        <option value="{{ current_year|add:"-1" }}" {% if selected_year == current_year|add:"-1" %}selected{% endif %}>{{ current_year|add:"-1" }}</option>
-    </select>
-
-    <button type="submit">Показать</button>
-</form>
 
 <!-- Общая выручка -->
 <h3>Общая сумма заказов: {{ total_revenue }} руб.</h3>
@@ -54,9 +37,31 @@
     {% endfor %}
 </table>
 
+
+
 <!-- Таблица выручки по дням -->
 <h3>Выручка по дням (Месяц: {{ selected_month }}. Год: {{ selected_year }})</h3>
-<table border="1" style="border-collapse: collapse; width: 100%;">
+
+
+<!-- Форма для выбора месяца -->
+<form method="get" action="">
+    <label for="month">Выберите месяц:</label>
+    <select name="month" id="month">
+        {% for i in months %}
+        <option value="{{ forloop.counter }}" {% if forloop.counter == selected_month %}selected{% endif %}>{{ i }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="year">Выберите год:</label>
+    <select name="year" id="year">
+        <option value="{{ current_year }}" {% if selected_year == current_year %}selected{% endif %}>{{ current_year }}</option>
+        <option value="{{ current_year|add:"-1" }}" {% if selected_year == current_year|add:"-1" %}selected{% endif %}>{{ current_year|add:"-1" }}</option>
+    </select>
+
+    <button type="submit">Показать</button>
+</form>
+
+<table id="revenueTable" border="1" style="border-collapse: collapse; width: 100%;">
     <tr>
         <th>Дата</th>
         <th>Выручка (руб.)</th>
@@ -76,8 +81,66 @@
     </tr>
 </table>
 
+<!-- График выручки -->
+<canvas id="revenueChart" width="400" height="200"></canvas>
 
+<!-- Подключение Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const table = document.getElementById('revenueTable');
+    const rows = table.querySelectorAll('tbody tr');
 
+    let dates = [];
+    let revenues = [];
+    let services = [];
+
+    rows.forEach(row => {
+        const date = row.cells[0].textContent;
+        const revenue = parseFloat(row.cells[1].textContent);
+        const serviceCount = parseInt(row.cells[2].textContent);
+
+        dates.push(date);
+        revenues.push(revenue);
+        services.push(serviceCount);
+    });
+
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [
+                {
+                    label: 'Выручка (руб.)',
+                    data: revenues,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    fill: false
+                },
+                {
+                    label: 'Количество услуг',
+                    data: services,
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Дата'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Сумма (руб.) / Количество'
+                    }
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}
-
-
