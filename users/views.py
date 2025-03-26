@@ -495,87 +495,220 @@ from django.db.models import Count, Sum, F
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from datetime import timedelta
+
+from django.db.models import Count, Sum, F, Avg
+from django.db.models.functions import TruncDate
+from django.utils import timezone
+from datetime import timedelta
+from calendar import monthrange
+from users.models import User
+from goods.models import Service
+
+
+from django.db.models import Count, F, Sum, Avg
+from django.db.models.functions import TruncDate
+from django.shortcuts import render
+from django.utils import timezone
+from calendar import monthrange
+from datetime import timedelta
+from users.models import User, Employee
+from goods.models import Service
+from django.db.models import F, Count, Sum, Avg
+from django.utils import timezone
+from django.db.models import F, ExpressionWrapper, fields
+from django.db.models.functions import Now
+from calendar import monthrange
+from datetime import timedelta
+from django.db.models.functions import TruncDate
+
+
 def create_report(request):
-    # Получаем выбранный месяц и год (или используем текущие)
     selected_month = int(request.GET.get('month', timezone.now().month))
     selected_year = int(request.GET.get('year', timezone.now().year))
 
-    # Количество заказов по статусам
-    orders_by_status = Order.objects.values("status__status_name").annotate(count=Count("id"))
+    # Количество заказов по статусам (только статусы категории "Заказ")
+    orders_by_status = Order.objects.filter(
+        status__status_category='Заказ',
+        created_timestamp__year=selected_year,
+        created_timestamp__month=selected_month
+    ).values("status__status_name").annotate(count=Count("id")).order_by(
+        'status__status_name')  # Группировка и сортировка по статусу
 
-    # Количество услуг по статусам
-    services_by_status = OrderItem.objects.values("status__status_name").annotate(count=Count("id"))
+    # Итого для заказов
+    total_orders_count = sum(item['count'] for item in orders_by_status)
 
-    # Выручка по дням с учетом выбранного месяца и года
+    # Количество услуг по статусам (только статусы категории "Услуга")
+    services_by_status = OrderItem.objects.filter(
+        status__status_category='Услуга',
+        created_timestamp__year=selected_year,
+        created_timestamp__month=selected_month
+    ).values("status__status_name").annotate(count=Count("id")).order_by(
+        'status__status_name')  # Группировка и сортировка по статусу
+
+    # Итого для услуг
+    total_services_count = sum(item['count'] for item in services_by_status)
+
+    # Добавляем строку "Итого"
+    orders_by_status = list(orders_by_status) + [{'status__status_name': 'Итого', 'count': total_orders_count}]
+    services_by_status = list(services_by_status) + [{'status__status_name': 'Итого', 'count': total_services_count}]
+
+    # Выручка по дням
     revenue_by_date = OrderItem.objects.annotate(
-        total_price=F('price') * F('quantity')  # Вычисляем сумму за каждый заказ
-    ).annotate(
-        created_date=TruncDate('created_timestamp')  # Оставляем только дату, без времени
+        total_price=F('price') * F('quantity'),
+        created_date=TruncDate('created_timestamp')
     ).filter(
         created_date__year=selected_year,
         created_date__month=selected_month
     ).values('created_date').annotate(
-        total_revenue=Sum('total_price'),  # Суммируем по датам
-        total_services=Count('id')  # Считаем количество заказанных услуг
+        total_revenue=Sum('total_price'),
+        total_services=Count('id')
     ).order_by('created_date')
 
-    # Составляем полный список всех дней в выбранном месяце
-    from calendar import monthrange
+    # Генерация всех дней месяца
     start_date = timezone.datetime(selected_year, selected_month, 1).date()
     end_date = timezone.datetime(selected_year, selected_month, monthrange(selected_year, selected_month)[1]).date()
 
-    # Генерация всех дней в месяце
-    date_range = []
-    current_date = start_date
-    while current_date <= end_date:
-        date_range.append(current_date)
-        current_date += timedelta(days=1)
-
-    # Преобразуем выручку по дням в словарь с датами как ключами
+    date_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
     revenue_dict = {item['created_date']: item for item in revenue_by_date}
 
-    # Формируем окончательный список выручки по дням
     revenue_by_date = [
         {
             'date': date.strftime('%Y-%m-%d'),
-            'total_revenue': revenue_dict.get(date, {}).get('total_revenue', 0),
-            'total_services': revenue_dict.get(date, {}).get('total_services', 0)
+            'total_revenue': revenue_dict.get(date, {}).get('total_revenue', 0) or 0,
+            'total_services': revenue_dict.get(date, {}).get('total_services', 0) or 0
         }
         for date in date_range
     ]
 
-    # Считаем итоговую сумму заказанных услуг и их общей стоимости
+    # Итоговые суммы
     total_services_count = sum(item['total_services'] for item in revenue_by_date)
     total_revenue = sum(item['total_revenue'] for item in revenue_by_date)
+
+    # Средний чек (общая сумма заказов / количество заказов)
+    total_orders = Order.objects.filter(
+        created_timestamp__year=selected_year,
+        created_timestamp__month=selected_month
+    ).count()
+
+    # Средний чек: если есть заказы, считаем средний чек по общей выручке за месяц
+    avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
+
+    # Самая популярная услуга (используем service_name вместо name)
+    most_popular_service = OrderItem.objects.filter(
+        created_timestamp__year=selected_year,
+        created_timestamp__month=selected_month
+    ).values(
+        'product__service_name',
+        'product__category__category_name' # Исправлено с name на service_name
+    ).annotate(
+        count=Count('id')
+    ).order_by('-count').first()
+
+    # Самый загруженный день
+    busiest_day = Order.objects.annotate(
+        day=TruncDate('created_timestamp')
+    ).filter(
+        created_timestamp__year=selected_year,
+        created_timestamp__month=selected_month
+    ).values('day').annotate(
+        count=Count('id')
+    ).order_by('-count').first()
+    busiest_day = busiest_day['day'].strftime('%Y-%m-%d') if busiest_day else 'Нет данных'
+
+    # Процент выполненных заказов
+    completed_orders = Order.objects.filter(
+        status__status_name='Завершено',
+        created_timestamp__year=selected_year,
+        created_timestamp__month=selected_month
+    ).count()
+
+    completed_orders_percentage = round((completed_orders / total_orders) * 100, 2) if total_orders > 0 else 0
+
+    # Количество новых клиентов за месяц
+    new_customers_count = User.objects.filter(
+        date_joined__year=selected_year,
+        date_joined__month=selected_month
+    ).count()
+
+    # Среднее время выполнения заказа
+    completed_orders_with_time = Order.objects.exclude(order_finished_datetime=None).filter(
+        created_timestamp__year=selected_year,
+        created_timestamp__month=selected_month
+    )
+
+    # Рассчитываем среднее время выполнения
+    # Фильтрация завершенных заказов в выбранный месяц и год
+    # Фильтрация заказов по месяц и год
+    order_items_with_time = OrderItem.objects.filter(
+        work_ended_datetime__isnull=False,  # Проверяем, что время завершения работы есть
+        created_timestamp__year=selected_year,
+        created_timestamp__month=selected_month
+    )
+
+    # Вычисление разницы между временем начала работы и временем завершения
+    order_items_with_time = order_items_with_time.annotate(
+        completion_time=ExpressionWrapper(
+            F('work_ended_datetime') - F('created_timestamp'),
+            output_field=fields.DurationField()
+        )
+    )
+
+    # Среднее время выполнения работы
+    avg_work_time = order_items_with_time.aggregate(
+        avg_time=Avg('completion_time')
+    )['avg_time']
+
+    # Преобразование в часы (если avg_time не пустое)
+    if avg_work_time:
+        avg_work_time_in_hours = avg_work_time.total_seconds() / 3600
+    else:
+        avg_work_time_in_hours = 0
+
+    # Доля повторных заказов
+    customers_with_orders = Order.objects.filter(
+        created_timestamp__year=selected_year,
+        created_timestamp__month=selected_month
+    ).values('user').annotate(order_count=Count('id'))
+    repeat_customers = customers_with_orders.filter(order_count__gt=1).count()
+    repeat_order_percentage = round((repeat_customers / customers_with_orders.count()) * 100,
+                                    2) if customers_with_orders.exists() else 0
+
+    # Выручка по категориям услуг (используем category_name вместо name)
+    revenue_by_category = OrderItem.objects.filter(
+        created_timestamp__year=selected_year,
+        created_timestamp__month=selected_month
+    ).values(
+        'product__category__category_name'  # Исправлено с name на category_name
+    ).annotate(
+        revenue=Sum(F('price') * F('quantity'))
+    ).order_by('-revenue')
 
     # Список месяцев
     months = [
         'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
         'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
     ]
-
-    # Получаем текущий месяц и год
     current_year = timezone.now().year
-
-    # Общая сумма всех заказов
-    total_revenue_all = OrderItem.objects.annotate(
-        total_price=F('price') * F('quantity')
-    ).aggregate(total=Sum('total_price'))["total"] or 0
-
-
-
 
     context = {
         "orders_by_status": list(orders_by_status),
         "services_by_status": list(services_by_status),
         "revenue_by_date": revenue_by_date,
-        "total_revenue": total_revenue_all,
+        "total_revenue": total_revenue,
         "total_services_count": total_services_count,
         "total_revenue_month": total_revenue,
         "months": months,
         "selected_month": selected_month,
         "selected_year": selected_year,
-        "current_year": current_year
+        "current_year": current_year,
+        "avg_order_value": round(avg_order_value, 2),
+        "most_popular_service": most_popular_service,
+        "busiest_day": busiest_day,
+        "completed_orders_percentage": completed_orders_percentage,
+        "new_customers_count": new_customers_count,
+        "avg_order_completion_time": round(avg_work_time_in_hours, 2),
+        "repeat_order_percentage": repeat_order_percentage,
+        "revenue_by_category": list(revenue_by_category),
     }
 
     return render(request, 'users/reports.html', context)

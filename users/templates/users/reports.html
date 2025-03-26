@@ -3,9 +3,29 @@
 {% block content %}
 <h2>Отчеты по заказам</h2>
 
+<!-- Форма для выбора месяца -->
+<form method="get" action="">
+    <label for="month">Выберите месяц:</label>
+    <select name="month" id="month">
+        {% for i in months %}
+        <option value="{{ forloop.counter }}" {% if forloop.counter == selected_month %}selected{% endif %}>{{ i }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="year">Выберите год:</label>
+    <select name="year" id="year">
+        <option value="{{ current_year }}" {% if selected_year == current_year %}selected{% endif %}>{{ current_year }}</option>
+        <option value="{{ current_year|add:"-1" }}" {% if selected_year == current_year|add:"-1" %}selected{% endif %}>{{ current_year|add:"-1" }}</option>
+    </select>
+
+    <button type="submit">Показать</button>
+</form>
 
 <!-- Общая выручка -->
-<h3>Общая сумма заказов: {{ total_revenue }} руб.</h3>
+<h3>Общая сумма за месяц: {{ total_revenue }} руб.</h3>
+<h3>Средний чек за месяц: {{ avg_order_value }} руб.</h3>
+<h3>Процент выполненных заказов за месяц: {{ completed_orders_percentage }}%</h3>
+
 
 <!-- Таблица заказов по статусам -->
 <h3>Количество заказов по статусам</h3>
@@ -37,29 +57,9 @@
     {% endfor %}
 </table>
 
-
-
 <!-- Таблица выручки по дням -->
 <h3>Выручка по дням (Месяц: {{ selected_month }}. Год: {{ selected_year }})</h3>
 
-
-<!-- Форма для выбора месяца -->
-<form method="get" action="">
-    <label for="month">Выберите месяц:</label>
-    <select name="month" id="month">
-        {% for i in months %}
-        <option value="{{ forloop.counter }}" {% if forloop.counter == selected_month %}selected{% endif %}>{{ i }}</option>
-        {% endfor %}
-    </select>
-
-    <label for="year">Выберите год:</label>
-    <select name="year" id="year">
-        <option value="{{ current_year }}" {% if selected_year == current_year %}selected{% endif %}>{{ current_year }}</option>
-        <option value="{{ current_year|add:"-1" }}" {% if selected_year == current_year|add:"-1" %}selected{% endif %}>{{ current_year|add:"-1" }}</option>
-    </select>
-
-    <button type="submit">Показать</button>
-</form>
 
 <table id="revenueTable" border="1" style="border-collapse: collapse; width: 100%;">
     <tr>
@@ -83,6 +83,12 @@
 
 <!-- График выручки -->
 <canvas id="revenueChart" width="400" height="200"></canvas>
+
+<h3>Самая популярная услуга за месяц: {{ most_popular_service.product__service_name }} | {{ most_popular_service.product__category__category_name }}</h3> <!-- Если это объект с полем service_name -->
+<h3>Самый загруженный день за месяц: {{ busiest_day }}</h3>
+<h3>Количество новых клиентов за месяц: {{ new_customers_count }}</h3>
+<h3>Среднее время выполнения заказа за месяц: {{ avg_order_completion_time }} ч.</h3>
+<h3>Доля повторных заказов за месяц: {{ repeat_order_percentage }}%</h3>
 
 <!-- Подключение Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -143,4 +149,5 @@
         }
     });
 </script>
+
 {% endblock %}
