@@ -81,8 +81,8 @@
                                     const dateInput = document.getElementById('date');
                                     const deliveryDateTimeInput = document.getElementById('delivery_datetime');
                                     const startTime = 8;
-                                    const endTime = 16;
-                                    const interval = 15;
+                                    const endTime = 17;
+                                    const interval = 10;
 
                                     function populateTimeOptions(selectedDate) {
                                         timeSelect.innerHTML = '';
@@ -98,6 +98,9 @@
                                                 const occupiedTimes = data.occupied_times || [];
                                                 console.log('Занятые времена:', occupiedTimes);
 
+                                                const now = new Date();
+                                                const today = now.toISOString().split('T')[0];
+
                                                 for (let hour = startTime; hour < endTime; hour++) {
                                                     for (let minutes = 0; minutes < 60; minutes += interval) {
                                                         const time = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
@@ -108,8 +111,18 @@
                                                         option.value = time;
                                                         option.textContent = time;
 
+                                                        // Блокируем уже занятые времена
                                                         if (occupiedTimes.includes(time)) {
                                                             option.disabled = true;
+                                                        }
+
+                                                        // Запрещаем выбор времени раньше текущего, если выбрана сегодняшняя дата
+                                                        if (selectedDate === today) {
+                                                            const selectedTime = new Date();
+                                                            selectedTime.setHours(hour, minutes, 0, 0);
+                                                            if (selectedTime < now) {
+                                                                option.disabled = true;
+                                                            }
                                                         }
 
                                                         timeSelect.appendChild(option);
@@ -154,74 +167,74 @@
                                     populateTimeOptions(today);
                                 });
                             </script>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">Способ доставки: </label>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="requires_delivery"
-                                       id="id_requires_delivery_delivery" value="1" checked onclick="toggleDeliveryAddress()">
-                                <label class="form-check-label" for="id_requires_delivery_delivery">Нужна доставка (500 руб.)</label>
-                                {% if form.requires_delivery.errors %}
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        {{ form.requires_delivery.errors }}
-                                    </div>
-                                {% endif %}
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="requires_delivery"
-                                       id="id_requires_delivery_pickup" value="0" onclick="toggleDeliveryAddress()">
-                                <label class="form-check-label" for="id_requires_delivery_pickup">Самовывоз</label>
-                            </div>
-                        </div>
-                        <div class="mb-3" id="deliveryAddressField">
-                            <label for="id_delivery_address" class="form-label">Адрес доставки*:</label>
-                            <textarea class="form-control" id="id_delivery_address" name="delivery_address" rows="2"></textarea>
-                            {% if form.delivery_address.errors %}
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    {{ form.delivery_address.errors }}
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Способ доставки: </label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="requires_delivery"
+                                           id="id_requires_delivery_delivery" value="1" checked onclick="toggleDeliveryAddress()">
+                                    <label class="form-check-label" for="id_requires_delivery_delivery">Нужна доставка (500 руб.)</label>
+                                    {% if form.requires_delivery.errors %}
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            {{ form.requires_delivery.errors }}
+                                        </div>
+                                    {% endif %}
                                 </div>
-                            {% endif %}
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="requires_delivery"
+                                           id="id_requires_delivery_pickup" value="0" onclick="toggleDeliveryAddress()">
+                                    <label class="form-check-label" for="id_requires_delivery_pickup">Самовывоз</label>
+                                </div>
+                            </div>
+                            <div class="mb-3" id="deliveryAddressField">
+                                <label for="id_delivery_address" class="form-label">Адрес доставки*:</label>
+                                <textarea class="form-control" id="id_delivery_address" name="delivery_address" rows="2"></textarea>
+                                {% if form.delivery_address.errors %}
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ form.delivery_address.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Способ оплаты: </label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="payment_on_get"
+                                           id="id_payment_on_get" value="0" checked>
+                                    <label class="form-check-label" for="id_payment_on_get">Оплата картой</label>
+                                    {% if form.payment_on_get.errors %}
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            {{ form.payment_on_get.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="payment_on_get"
+                                           id="id_payment_on_get_cash" value="1">
+                                    <label class="form-check-label" for="id_payment_on_get_cash">Наличными/картой при получении</label>
+                                    {% if form.payment_on_get.errors %}
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            {{ form.payment_on_get.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    <label for="id_comment" class="form-label">Комментарий (если нужен):</label>
+                                    <textarea class="form-control" id="id_comment" name="comment" rows="2"></textarea>
+                                    {% if form.comment.errors %}
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            {{ form.comment.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">Способ оплаты: </label>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="payment_on_get"
-                                       id="id_payment_on_get" value="0" checked>
-                                <label class="form-check-label" for="id_payment_on_get">Оплата картой</label>
-                                {% if form.payment_on_get.errors %}
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        {{ form.payment_on_get.errors }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="payment_on_get"
-                                       id="id_payment_on_get_cash" value="1">
-                                <label class="form-check-label" for="id_payment_on_get_cash">Наличными/картой при получении</label>
-                                {% if form.payment_on_get.errors %}
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        {{ form.payment_on_get.errors }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="mb-3">
-                                <label for="id_comment" class="form-label">Комментарий (если нужен):</label>
-                                <textarea class="form-control" id="id_comment" name="comment" rows="2"></textarea>
-                                {% if form.comment.errors %}
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        {{ form.comment.errors }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-dark">Оформить заказ</button>
-                </form>
+                        <button type="submit" class="btn btn-dark">Оформить заказ</button>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script>
+        <script>
         function toggleDeliveryAddress() {
             const deliveryAddressField = document.getElementById('id_delivery_address');
             const pickupOption = document.getElementById('id_requires_delivery_pickup').checked;
