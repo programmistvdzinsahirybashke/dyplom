@@ -14,4 +14,5 @@ urlpatterns = [
     path('orders/item/<int:item_id>/toggle_picked/', views.toggle_picked_status, name='toggle_picked_status'),
     path('toggle_all_tasks_status/<int:order_id>/', views.toggle_all_tasks_status, name='toggle_all_tasks_status'),
     path("admin/reports/", views.create_report, name="admin_reports"),
+    path('profile/cancel_order/<int:order_id>/', views.cancel_order, name='cancel_order'),
 ]

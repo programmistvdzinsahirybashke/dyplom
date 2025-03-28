@@ -141,6 +141,17 @@
                                             {% endfor %}
                                         </tbody>
                                     </table>
+                                     {% if order.status.id == 1 %}
+                                     <form method="post" action="{% url 'users:cancel_order' order.id %}" onsubmit="return confirmCancelOrder();">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger ">Отменить заказ</button>
+                                     </form>
+                                     <script>
+                                        function confirmCancelOrder() {
+                                            return confirm("Вы уверены, что хотите отменить заказ?");
+                                        }
+                                     </script>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

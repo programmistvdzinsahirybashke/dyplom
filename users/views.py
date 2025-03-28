@@ -599,3 +599,16 @@ def create_report(request):
     }
 
     return render(request, 'users/reports.html', context)
+
+
+@login_required
+def cancel_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    if order.status.id != 1:
+        messages.error(request, "Вы не можете отменить этот заказ.")
+        return redirect('user:profile')
+
+    order.delete()
+    messages.success(request, "Заказ успешно отменен.")
+    return redirect('user:profile')
