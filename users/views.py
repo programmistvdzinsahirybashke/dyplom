@@ -15,6 +15,12 @@ from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
+
+# Обрабатывает вход пользователя в систему.
+# При POST проверяет данные формы, авторизует пользователя,
+# при успешной авторизации обновляет корзину, если есть сессия,
+# и перенаправляет либо на страницу из 'next', либо на главную.
+# При GET отображает форму входа.
 def login(request):
     if request.method == 'POST':
         form = UserLoginForm(data=request.POST)
@@ -47,6 +53,11 @@ def login(request):
     return render(request, 'users/login.html', context=context)
 
 
+# Обрабатывает регистрацию нового пользователя.
+# При POST проверяет корректность данных, сохраняет нового пользователя,
+# автоматически его логинит, связывает корзину с пользователем,
+# и перенаправляет на главную страницу.
+# При GET отображает форму регистрации.
 def registration(request):
     if request.method == 'POST':
         form = UserRegistrationForm(data=request.POST)
@@ -74,6 +85,10 @@ def registration(request):
     return render(request, 'users/registration.html', context=context)
 
 
+# Позволяет авторизованному пользователю просмотреть и обновить свой профиль.
+# При POST обновляет данные профиля, при GET отображает форму с текущими данными.
+# Также выводит список заказов пользователя с возможностью поиска по ID или статусу,
+# и рассчитывает общую сумму каждого заказа.
 @login_required
 def profile(request):
     if request.method == 'POST':
@@ -115,10 +130,14 @@ def profile(request):
     return render(request, 'users/profile.html', context=context)
 
 
+# Отображает страницу корзины пользователя.
+# Функция простая и не требует авторизации.
 def users_cart(request):
     return render(request, 'users/users_cart.html')
 
 
+# Выход из аккаунта для авторизованного пользователя.
+# Завершает сессию, выводит сообщение и перенаправляет на главную страницу.
 @login_required
 def logout(request):
     messages.success(request, f'Вы вышли из аккаунта')
@@ -126,6 +145,13 @@ def logout(request):
     return redirect(reverse('repair_app:index'))
 
 
+# Представление для администратора для просмотра и управления всеми заказами.
+# Проверяет, что пользователь — суперпользователь, иначе ошибка 404.
+# Поддерживает фильтрацию заказов по поиску, статусу и сортировке по дате.
+# Для каждого заказа собирает доступных сотрудников по категориям услуг.
+# Обрабатывает POST-запросы для назначения сотрудников на отдельные или все услуги заказа,
+# а также обновления данных заказа (статус, адрес доставки, комментарии).
+# После изменений перенаправляет на ту же страницу с сохранением фильтров.
 @login_required
 def admin_orders(request):
     if not request.user.is_superuser:
@@ -257,6 +283,9 @@ def admin_orders(request):
     return render(request, 'users/admin_orders.html', context)
 
 
+# Обновляет сотрудника, назначенного на конкретную услугу (OrderItem).
+# Получает заказ по ID, и сотрудника из POST-запроса,
+# После обновления перенаправляет назад на предыдущую страницу.
 def update_employee(request, order_id):
     order = Order.objects.get(id=order_id)
     employee_id = request.POST.get('employee')
@@ -270,6 +299,9 @@ def update_employee(request, order_id):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
+# Позволяет админимстратору переключать статус конкретного элемента заказа (OrderItem)
+# между двумя статусами: "забрал" (id=7) и "не забрал" (id=3).
+# После изменения статуса выполняется редирект назад на страницу, с которой был запрос.
 @login_required
 def toggle_picked_status(request, item_id):
     item = get_object_or_404(OrderItem, id=item_id)
@@ -277,14 +309,24 @@ def toggle_picked_status(request, item_id):
     if item.status.id == 3:
         # Меняем статус на "забрал"
         item.status = Status.objects.get(id=7)  # Замените на нужный ID
+        messages.success(request, f"Статус изменен - 'Выдано'.")
     elif item.status.id == 7:
         # Меняем статус на "не забрал"
         item.status = Status.objects.get(id=3)
+        messages.success(request, f"Статус изменен - 'Выполнено' (выдача отменена).")
+    else:
+        messages.warning(request,
+                         f"Статус не изменен. У задачи должен быть статус 'Выполнено'.")
 
     item.save()
     return redirect(request.META.get('HTTP_REFERER', '/'))  # Перенаправление назад
 
 
+# Переключает статус всех элементов заказа (OrderItem) одновременно,
+# если все они имеют одинаковый статус либо 3 ("Выполнено"), либо 7 ("Выдан").
+# Меняет все статусы с 3 на 7 или наоборот.
+# Если условие не выполняется, выводит предупреждение.
+# После обработки происходит редирект назад.
 def toggle_all_tasks_status(request, order_id):
     # Получаем заказ по ID
     order = get_object_or_404(Order, id=order_id)
@@ -309,13 +351,18 @@ def toggle_all_tasks_status(request, order_id):
         messages.success(request, f"Статусы изменены (заказ №{order_id}).")
     else:
         # Если хотя бы одна задача не имеет статус 3 или 7, выводим сообщение
-        messages.warning(request,
-                         f"Статусы не изменены (заказ №{order_id}). У всех задач должен быть статус 'Выполнено' или 'Выдан'.")
+        messages.warning(request, f"Статусы не изменены (заказ №{order_id}). У всех задач должен быть статус "
+                                  f"'Выполнено' или 'Выдан'.")
 
     # Перенаправляем обратно на страницу, с которой был запрос
     return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
+# Отображает страницу со списком заказов и заявок, назначенных текущему сотруднику (только для сотрудников).
+# Позволяет фильтровать заявки по поиску, статусу и сортировать по номеру заказа.
+# Обрабатывает изменение статуса заявки через POST-запрос (например, пометить как "В работе" или "Выполнено").
+# В случае изменения статуса обновляет запись и отображает уведомление.
+# Возвращает отфильтрованный и отсортированный список заказов и заявок для текущего сотрудника.
 @login_required
 def staff_orders(request):
     if not request.user.is_staff:
@@ -410,18 +457,20 @@ def create_report(request):
     if not request.user.is_superuser:
         raise Http404("Доступ ограничен: только для администраторов.")
 
+    # Получаем месяц и год из GET-параметров или используем текущие значения по умолчанию
     selected_month = int(request.GET.get('month', timezone.now().month))
     selected_year = int(request.GET.get('year', timezone.now().year))
 
     # Количество заказов по статусам (только статусы категории "Заказ")
-    orders_by_status = Order.objects.filter(
-        status__status_category='Заказ',
+    orders_by_status = (Order.objects.filter(
+        status__status_category='Заказ', # фильтруем по категории статуса "Заказ"
         created_timestamp__year=selected_year,
         created_timestamp__month=selected_month
-    ).values("status__status_name").annotate(count=Count("id")).order_by(
-        'status__status_name')  # Группировка и сортировка по статусу
+    ).values("status__status_name") # группируем по названию статуса
+    .annotate(count=Count("id")) # считаем количество заказов в каждой группе
+    .order_by('status__status_name'))  # сортируем по имени статуса для удобства
 
-    # Итого для заказов
+    # Считаем общее количество заказов за месяц (суммируем по всем статусам)
     total_orders_count = sum(item['count'] for item in orders_by_status)
 
     # Количество услуг по статусам (только статусы категории "Услуга")
@@ -435,29 +484,31 @@ def create_report(request):
     # Итого для услуг
     total_services_count = sum(item['count'] for item in services_by_status)
 
-    # Добавляем строку "Итого"
+    # Добавляем в списки итоговую строку "Итого" с общим количеством
     orders_by_status = list(orders_by_status) + [{'status__status_name': 'Итого', 'count': total_orders_count}]
     services_by_status = list(services_by_status) + [{'status__status_name': 'Итого', 'count': total_services_count}]
 
-    # Выручка по дням
+    # Выручка по дням: для каждого дня месяца считаем сумму цен услуг * количество и количество услуг
     revenue_by_date = OrderItem.objects.annotate(
-        total_price=F('price') * F('quantity'),
-        created_date=TruncDate('created_timestamp')
+        total_price=F('price') * F('quantity'), # считаем итоговую цену для каждой заявки
+        created_date=TruncDate('created_timestamp') # округляем дату создания заявки до дня
     ).filter(
         created_date__year=selected_year,
         created_date__month=selected_month
     ).values('created_date').annotate(
-        total_revenue=Sum('total_price'),
-        total_services=Count('id')
+        total_revenue=Sum('total_price'), # суммируем выручку по дню
+        total_services=Count('id') # считаем количество услуг по дню
     ).order_by('created_date')
 
-    # Генерация всех дней месяца
+    # Генерируем полный список всех дней выбранного месяца, чтобы потом заполнить отсутствующие даты нулями
     start_date = timezone.datetime(selected_year, selected_month, 1).date()
     end_date = timezone.datetime(selected_year, selected_month, monthrange(selected_year, selected_month)[1]).date()
 
     date_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+    # Преобразуем queryset в словарь для быстрого доступа по дате
     revenue_dict = {item['created_date']: item for item in revenue_by_date}
 
+    # Формируем список с выручкой и количеством услуг на каждый день месяца, заполняя пустые дни нулями
     revenue_by_date = [
         {
             'date': date.strftime('%Y-%m-%d'),
@@ -467,20 +518,20 @@ def create_report(request):
         for date in date_range
     ]
 
-    # Итоговые суммы
+    # Итоговые суммы по всем дням
     total_services_count = sum(item['total_services'] for item in revenue_by_date)
     total_revenue = sum(item['total_revenue'] for item in revenue_by_date)
 
-    # Средний чек (общая сумма заказов / количество заказов)
+    # Общее количество заказов за месяц для расчета среднего чека
     total_orders = Order.objects.filter(
         created_timestamp__year=selected_year,
         created_timestamp__month=selected_month
     ).count()
 
-    # Средний чек: если есть заказы, считаем средний чек по общей выручке за месяц
+    # Средний чек = общая выручка / количество заказов (если заказы есть)
     avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
 
-    # Самая популярная услуга (используем service_name вместо name)
+    # Определяем самую популярную услугу по количеству заказов (используем поля product__service_name и category)
     most_popular_service = OrderItem.objects.filter(
         created_timestamp__year=selected_year,
         created_timestamp__month=selected_month
@@ -491,7 +542,7 @@ def create_report(request):
         count=Count('id')
     ).order_by('-count').first()
 
-    # Самый загруженный день
+    # Определяем самый загруженный день по количеству заказов
     busiest_day = Order.objects.annotate(
         day=TruncDate('created_timestamp')
     ).filter(
@@ -502,7 +553,7 @@ def create_report(request):
     ).order_by('-count').first()
     busiest_day = busiest_day['day'].strftime('%Y-%m-%d') if busiest_day else 'Нет данных'
 
-    # Процент выполненных заказов
+    # Вычисляем процент выполненных заказов (статус "Завершено")
     completed_orders = Order.objects.filter(
         status__status_name='Завершено',
         created_timestamp__year=selected_year,
@@ -511,21 +562,19 @@ def create_report(request):
 
     completed_orders_percentage = round((completed_orders / total_orders) * 100, 2) if total_orders > 0 else 0
 
-    # Количество новых клиентов за месяц
+    # Количество новых клиентов, зарегистрированных в выбранном месяце
     new_customers_count = User.objects.filter(
         date_joined__year=selected_year,
         date_joined__month=selected_month
     ).count()
 
-    # Среднее время выполнения заказа
+    # Рассчитываем среднее время выполнения заказа по услугам с заполненным временем окончания работы
     completed_orders_with_time = Order.objects.exclude(order_finished_datetime=None).filter(
         created_timestamp__year=selected_year,
         created_timestamp__month=selected_month
     )
 
-    # Рассчитываем среднее время выполнения
-    # Фильтрация завершенных заказов в выбранный месяц и год
-    # Фильтрация заказов по месяц и год
+    # Рассчитываем среднее время выполнения заказа по услугам с заполненным временем окончания работы
     order_items_with_time = OrderItem.objects.filter(
         work_ended_datetime__isnull=False,  # Проверяем, что время завершения работы есть
         created_timestamp__year=selected_year,
@@ -535,7 +584,7 @@ def create_report(request):
     # Вычисление разницы между временем начала работы и временем завершения
     order_items_with_time = order_items_with_time.annotate(
         completion_time=ExpressionWrapper(
-            F('work_ended_datetime') - F('created_timestamp'),
+            F('work_ended_datetime') - F('created_timestamp'), # разница между временем окончания и создания
             output_field=fields.DurationField()
         )
     )
@@ -545,13 +594,13 @@ def create_report(request):
         avg_time=Avg('completion_time')
     )['avg_time']
 
-    # Преобразование в часы (если avg_time не пустое)
+    # Переводим среднее время выполнения из timedelta в часы
     if avg_work_time:
         avg_work_time_in_hours = avg_work_time.total_seconds() / 3600
     else:
         avg_work_time_in_hours = 0
 
-    # Доля повторных заказов
+    # Вычисляем процент повторных заказов: пользователей с более чем одним заказом
     customers_with_orders = Order.objects.filter(
         created_timestamp__year=selected_year,
         created_timestamp__month=selected_month
@@ -560,23 +609,24 @@ def create_report(request):
     repeat_order_percentage = round((repeat_customers / customers_with_orders.count()) * 100,
                                     2) if customers_with_orders.exists() else 0
 
-    # Выручка по категориям услуг (используем category_name вместо name)
+    # Выручка по категориям услуг (сумма price * quantity, сгруппированная по категории)
     revenue_by_category = OrderItem.objects.filter(
         created_timestamp__year=selected_year,
         created_timestamp__month=selected_month
     ).values(
-        'product__category__category_name'  # Исправлено с name на category_name
+        'product__category__category_name'  # название категории
     ).annotate(
-        revenue=Sum(F('price') * F('quantity'))
+        revenue=Sum(F('price') * F('quantity')) # сумма выручки по категории
     ).order_by('-revenue')
 
-    # Список месяцев
+    # Список месяцев для интерфейса выбора
     months = [
         'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
         'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
     ]
     current_year = timezone.now().year
 
+    # Формируем контекст для шаблона с отчетом
     context = {
         "orders_by_status": list(orders_by_status),
         "services_by_status": list(services_by_status),
@@ -605,10 +655,12 @@ def create_report(request):
 def cancel_order(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
+    # Проверяем, находится ли заказ в статусе, который допускает отмену (например, статус с id = 1 — "В обработке")
     if order.status.id != 1:
         messages.error(request, "Вы не можете отменить этот заказ.")
         return redirect('user:profile')
 
     order.delete()
+    # Выводим сообщение об успешной отмене
     messages.success(request, "Заказ успешно отменен.")
     return redirect('user:profile')

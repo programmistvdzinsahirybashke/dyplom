@@ -6,6 +6,10 @@ from carts.models import Cart
 
 
 # Create your views here.
+
+# Представление для добавления услуги в корзину.
+# Получает ID услуги из POST-запроса и либо увеличивает количество,
+# либо создаёт новую запись в корзине (в зависимости от авторизации пользователя).
 def cart_add(request):
     product_id = request.POST.get("product_id")
     product = Service.objects.get(id=product_id)
@@ -41,7 +45,9 @@ def cart_add(request):
     }
     return JsonResponse(response_data)
 
-
+# Представление для изменения количества услуги в корзине.
+# Получает ID позиции и новое количество из POST-запроса, обновляет значение
+# и возвращает обновлённую HTML-разметку корзины.
 def cart_change(request):
     cart_id = request.POST.get("cart_id")
     quantity = request.POST.get("quantity")
@@ -64,7 +70,9 @@ def cart_change(request):
 
     return JsonResponse(response_data)
 
-
+# Представление для удаления услуги из корзины.
+# Получает ID позиции из POST-запроса, удаляет её из корзины
+# и возвращает HTML корзины без удалённого элемента.
 def cart_remove(request):
     cart_id = request.POST.get("cart_id")
 

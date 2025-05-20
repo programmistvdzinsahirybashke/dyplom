@@ -5,6 +5,10 @@ from goods.utils import q_search
 
 
 # Create your views here.
+
+# Представление для отображения каталога товаров (услуг).
+# Поддерживает фильтрацию по категории, поиск по ключевым словам,
+# фильтрацию по скидке и сортировку, а также постраничный вывод.
 def catalog(request, category_slug=None):
     page = request.GET.get('page', 1)
     on_sale = request.GET.get('on_sale', None)
@@ -34,7 +38,8 @@ def catalog(request, category_slug=None):
     }
     return render(request, "goods/catalog.html", context)
 
-
+# Представление для отображения страницы конкретного товара (услуги).
+# Получает товар по его slug и передаёт его в шаблон для отображения.
 def product(request, product_slug):
     product = Service.objects.get(slug=product_slug)
 

@@ -2,6 +2,9 @@ from django.shortcuts import render
 
 
 # Create your views here.
+
+# Представление главной страницы сайта.
+# Отображает приветственное сообщение и название сайта RepAir.
 def index(request):
     context = {
         'title': 'RepAir - Главная',

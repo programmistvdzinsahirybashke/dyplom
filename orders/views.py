@@ -11,6 +11,10 @@ from datetime import datetime
 
 
 # Create your views here.
+
+# Представление для оформления заказа. Доступно только авторизованным пользователям.
+# Обрабатывает POST-запрос с формой заказа, сохраняет данные заказа и товаров из корзины,
+# очищает корзину и перенаправляет пользователя в профиль. При GET-запросе — отображает форму.
 @login_required
 def create_order(request):
     if request.method == 'POST':
@@ -81,6 +85,8 @@ def create_order(request):
     return render(request, 'orders/create_order.html', context=context)
 
 
+# Представление для получения уже занятых временных интервалов на выбранную дату.
+# Используется, чтобы не дать пользователю выбрать недоступное время доставки.
 def get_occupied_times(request):
     # Получаем параметр "date" из GET-запроса
     date = request.GET.get('date')
